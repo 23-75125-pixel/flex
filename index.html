@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Flex | Innovate • Connect • Grow</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,300&family=Fraunces:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --c-bg:      #f7f9fc;
+      --c-surface: #ffffff;
+      --c-border:  #e2e8f2;
+      --c-ink:     #0a0f1e;
+      --c-ink2:    #3d4966;
+      --c-ink3:    #8493b0;
+      --c-blue:    #1648f5;
+      --c-sky:     #0ea5e9;
+      --c-cyan:    #06d6a0;
+      --c-grad:    linear-gradient(135deg,#1648f5 0%,#0ea5e9 55%,#06d6a0 100%);
+      --shadow-sm: 0 1px 3px rgba(10,15,30,.06),0 1px 2px rgba(10,15,30,.04);
+      --shadow-md: 0 4px 16px rgba(10,15,30,.08),0 2px 6px rgba(10,15,30,.05);
+      --shadow-lg: 0 12px 40px rgba(10,15,30,.12),0 4px 12px rgba(10,15,30,.06);
+      --r-sm: 10px;
+      --r-md: 16px;
+      --r-lg: 24px;
+      --r-xl: 32px;
+    }
+
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Plus Jakarta Sans',sans-serif;
+      background:var(--c-bg);
+      color:var(--c-ink);
+      overflow-x:hidden;
+      cursor:none;
+    }
+
+    /* ── Cursor ── */
+    #cursor-dot{
+      position:fixed;width:8px;height:8px;
+      background:var(--c-blue);border-radius:50%;
+      pointer-events:none;z-index:99999;
+      transform:translate(-50%,-50%);
+    }
+    #cursor-ring{
+      position:fixed;width:36px;height:36px;
+      border:1.5px solid rgba(22,72,245,.35);border-radius:50%;
+      pointer-events:none;z-index:99998;
+      transform:translate(-50%,-50%);
+      transition:width .2s,height .2s,border-color .2s;
+    }
+    body:has(a:hover) #cursor-ring,
+    body:has(button:hover) #cursor-ring{
+      width:54px;height:54px;border-color:rgba(22,72,245,.5);
+    }
+
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:var(--c-bg);}
+    ::-webkit-scrollbar-thumb{background:var(--c-sky);border-radius:4px;}
+
+    h1,h2,h3,h4,h5{font-family:'Fraunces',serif;letter-spacing:-.02em;}
+    .gradient-text{
+      background:var(--c-grad);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text;
+    }
+
+    /* ════ NAVBAR ════ */
+    #navbar{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      padding:1rem 0;transition:all .4s ease;
+    }
+    #navbar.scrolled{
+      background:rgba(247,249,252,.9);
+      backdrop-filter:blur(20px);
+      border-bottom:1px solid var(--c-border);
+      padding:.65rem 0;
+      box-shadow:var(--shadow-sm);
+    }
+    .nav-inner{
+      max-width:1200px;margin:0 auto;padding:0 1.5rem;
+      display:flex;align-items:center;justify-content:space-between;
+    }
+    .nav-logo{display:flex;align-items:center;gap:.5rem;text-decoration:none;}
+    .nav-logo img{height:100px;}
+    .nav-logo-text{
+      font-family:'Fraunces',serif;font-weight:900;font-size:1.5rem;
+      background:var(--c-grad);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .nav-links{display:flex;align-items:center;gap:.2rem;list-style:none;}
+    .nav-links a{
+      font-size:.87rem;font-weight:600;color:var(--c-ink2);
+      text-decoration:none;padding:.45rem .9rem;border-radius:50px;
+      transition:color .2s,background .2s;
+    }
+    .nav-links a:hover,.nav-links a.active{color:var(--c-blue);}
+    .nav-links a.active{background:rgba(22,72,245,.06);}
+    .nav-cta{
+      background:var(--c-ink);color:#fff;border:none;
+      padding:.55rem 1.4rem;border-radius:50px;font-size:.87rem;
+      font-weight:700;font-family:'Plus Jakarta Sans',sans-serif;
+      cursor:none;text-decoration:none;
+      transition:background .25s,transform .2s,box-shadow .2s;
+    }
+    .nav-cta:hover{background:var(--c-blue);transform:translateY(-1px);box-shadow:0 4px 16px rgba(22,72,245,.3);color:#fff;}
+    .hamburger{display:none;background:none;border:none;cursor:none;font-size:1.5rem;color:var(--c-ink);}
+
+    /* Mobile menu */
+    .mobile-menu{
+      position:fixed;inset:0;background:rgba(247,249,252,.97);
+      backdrop-filter:blur(20px);z-index:999;
+      display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:1.8rem;
+      transform:translateX(100%);transition:transform .35s ease;
+    }
+    .mobile-menu.open{transform:translateX(0);}
+    .mobile-menu a{
+      font-size:1.6rem;font-family:'Fraunces',serif;font-weight:900;
+      color:var(--c-ink);text-decoration:none;transition:color .2s;
+    }
+    .mobile-menu a:hover{color:var(--c-blue);}
+    .menu-close{
+      position:absolute;top:1.5rem;right:1.5rem;
+      background:none;border:none;font-size:1.6rem;cursor:pointer;color:var(--c-ink);
+    }
+
+    /* ════ SECTION BASE ════ */
+    section{padding:6rem 0;}
+    .s-eyebrow{
+      font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:.74rem;font-weight:700;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--c-blue);
+      display:flex;align-items:center;gap:.5rem;margin-bottom:.8rem;
+    }
+    .s-eyebrow::before{
+      content:'';display:block;width:18px;height:2px;
+      background:var(--c-grad);border-radius:2px;flex-shrink:0;
+    }
+    .s-title{
+      font-size:clamp(1.8rem,3.5vw,2.9rem);font-weight:900;
+      line-height:1.12;letter-spacing:-.025em;margin-bottom:.9rem;
+    }
+    .s-desc{
+      font-size:.97rem;color:var(--c-ink2);line-height:1.78;max-width:540px;
+    }
+
+    /* Reveal */
+    .reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease;}
+    .reveal.up{opacity:1;transform:translateY(0);}
+    .d1{transition-delay:.07s;}.d2{transition-delay:.14s;}
+    .d3{transition-delay:.21s;}.d4{transition-delay:.28s;}
+
+    /* Buttons */
+    .btn-dark{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:var(--c-ink);color:#fff;text-decoration:none;
+      padding:.78rem 1.8rem;border-radius:50px;font-weight:700;
+      font-size:.9rem;transition:all .25s;border:none;cursor:none;
+      font-family:'Plus Jakarta Sans',sans-serif;
+    }
+    .btn-dark:hover{background:var(--c-blue);transform:translateY(-2px);box-shadow:0 8px 24px rgba(22,72,245,.3);color:#fff;}
+    .btn-outline{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:transparent;color:var(--c-ink);text-decoration:none;
+      padding:.78rem 1.8rem;border-radius:50px;font-weight:700;
+      font-size:.9rem;border:1.5px solid var(--c-border);transition:all .25s;
+    }
+    .btn-outline:hover{border-color:var(--c-blue);color:var(--c-blue);background:rgba(22,72,245,.05);}
+
+    /* ════ HERO ════ */
+    #hero{
+      min-height:100vh;display:flex;align-items:center;
+      padding:7rem 0 4rem;background:#fff;position:relative;overflow:hidden;
+    }
+    .hero-mesh{
+      position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 65% 55% at 75% 40%,rgba(14,165,233,.1) 0%,transparent 65%),
+        radial-gradient(ellipse 40% 40% at 15% 70%,rgba(22,72,245,.07) 0%,transparent 60%),
+        radial-gradient(ellipse 35% 30% at 90% 85%,rgba(6,214,160,.07) 0%,transparent 55%);
+    }
+    .hero-dots{
+      position:absolute;inset:0;
+      background-image:radial-gradient(rgba(14,165,233,.11) 1px,transparent 1px);
+      background-size:28px 28px;
+      mask-image:radial-gradient(ellipse 70% 70% at 70% 40%,black 0%,transparent 70%);
+      -webkit-mask-image:radial-gradient(ellipse 70% 70% at 70% 40%,black 0%,transparent 70%);
+    }
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(22,72,245,.07);border:1px solid rgba(22,72,245,.18);
+      border-radius:50px;padding:.35rem 1rem;
+      font-size:.76rem;font-weight:700;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--c-blue);margin-bottom:1.6rem;
+    }
+    .hero-dot{width:6px;height:6px;background:var(--c-cyan);border-radius:50%;animation:blink 1.4s infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+
+    .hero-h1{
+      font-size:clamp(3rem,6.5vw,5.6rem);font-weight:900;
+      line-height:1.04;letter-spacing:-.03em;margin-bottom:1.4rem;
+    }
+    .hero-sub{
+      font-size:1.08rem;color:var(--c-ink2);line-height:1.78;
+      max-width:480px;margin-bottom:2.2rem;
+    }
+    .hero-stats{display:flex;gap:2.2rem;margin-top:2.8rem;flex-wrap:wrap;}
+    .stat-val{
+      font-family:'Fraunces',serif;font-size:1.9rem;font-weight:900;
+      color:var(--c-ink);line-height:1;
+    }
+    .stat-lbl{font-size:.77rem;color:var(--c-ink3);margin-top:.15rem;}
+
+    /* Mockup */
+    .hero-visual{position:relative;}
+    .mockup{
+      background:#fff;border:1px solid var(--c-border);
+      border-radius:var(--r-xl);box-shadow:var(--shadow-lg);overflow:hidden;
+      animation:float 6s ease-in-out infinite;
+    }
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    .mbar{
+      display:flex;align-items:center;gap:.5rem;
+      padding:.7rem 1rem;background:var(--c-bg);border-bottom:1px solid var(--c-border);
+    }
+    .m-r{width:10px;height:10px;background:#ff5f57;border-radius:50%;}
+    .m-y{width:10px;height:10px;background:#febc2e;border-radius:50%;}
+    .m-g{width:10px;height:10px;background:#28c840;border-radius:50%;}
+    .murl{
+      flex:1;background:#fff;border:1px solid var(--c-border);border-radius:5px;
+      padding:.18rem .7rem;font-size:.72rem;color:var(--c-ink3);margin:0 .5rem;
+    }
+    .mbody{padding:1.2rem;}
+    .mstrip{
+      background:var(--c-grad);border-radius:10px;height:90px;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Fraunces',serif;color:#fff;font-size:1.2rem;font-weight:700;
+      margin-bottom:.9rem;letter-spacing:-.01em;
+    }
+    .mcards{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem;margin-bottom:.9rem;}
+    .mcard{
+      background:var(--c-bg);border:1px solid var(--c-border);
+      border-radius:10px;padding:.75rem;
+    }
+    .mcard-ico{font-size:1rem;margin-bottom:.3rem;}
+    .mcard-line{height:5px;background:var(--c-border);border-radius:3px;margin-bottom:.25rem;}
+    .mcard-line.s{width:60%;}
+    .mrow{display:grid;grid-template-columns:1fr 1fr;gap:.55rem;}
+    .mstat{
+      background:var(--c-bg);border:1px solid var(--c-border);border-radius:10px;padding:.7rem;
+    }
+    .mstat-n{
+      font-family:'Fraunces',serif;font-size:1.1rem;font-weight:900;
+      background:var(--c-grad);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .mstat-l{font-size:.65rem;color:var(--c-ink3);}
+
+    .h-chip{
+      position:absolute;background:#fff;border:1px solid var(--c-border);
+      border-radius:var(--r-md);padding:.6rem 1rem;box-shadow:var(--shadow-md);
+      display:flex;align-items:center;gap:.55rem;font-size:.8rem;
+      font-weight:600;white-space:nowrap;
+    }
+    .h-chip .chk{
+      width:20px;height:20px;background:#dcfce7;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.65rem;color:#16a34a;
+    }
+    .chip-a{top:-18px;right:30px;animation:float 5s ease-in-out infinite;}
+    .chip-b{bottom:20px;left:-20px;animation:float 6.5s ease-in-out infinite .6s;}
+
+    /* ════ MARQUEE ════ */
+    .marquee-wrap{
+      border-top:1px solid var(--c-border);border-bottom:1px solid var(--c-border);
+      background:#fff;padding:1.4rem 0;overflow:hidden;
+    }
+    .marquee-label{
+      font-size:.72rem;font-weight:700;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--c-ink3);text-align:center;
+      margin-bottom:.9rem;
+    }
+    .mq-track{
+      display:flex;gap:2.8rem;animation:mq 22s linear infinite;
+      width:max-content;
+    }
+    .mq-track:hover{animation-play-state:paused;}
+    @keyframes mq{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+    .mq-item{
+      display:flex;align-items:center;gap:.45rem;
+      font-weight:700;font-size:.92rem;color:var(--c-ink3);
+      white-space:nowrap;transition:color .2s;
+    }
+    .mq-item:hover{color:var(--c-blue);}
+
+    /* ════ ABOUT ════ */
+    #about{background:#fff;}
+    .about-card{
+      background:var(--c-bg);border:1px solid var(--c-border);
+      border-radius:var(--r-lg);padding:1.8rem;height:100%;
+      transition:all .3s;position:relative;overflow:hidden;
+    }
+    .about-card::after{
+      content:'';position:absolute;bottom:0;left:0;right:0;height:2.5px;
+      background:var(--c-grad);transform:scaleX(0);transform-origin:left;
+      transition:transform .35s;
+    }
+    .about-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);background:#fff;}
+    .about-card:hover::after{transform:scaleX(1);}
+    .ac-ico{font-size:1.6rem;margin-bottom:1rem;}
+    .about-card h5{font-size:1rem;font-weight:900;margin-bottom:.4rem;letter-spacing:-.01em;}
+    .about-card p{font-size:.86rem;color:var(--c-ink2);line-height:1.7;}
+
+    /* ════ SERVICES TABS ════ */
+    #services{background:var(--c-bg);}
+    .tab-row{
+      display:flex;gap:.3rem;flex-wrap:wrap;
+      border-bottom:1px solid var(--c-border);margin-bottom:2.5rem;
+    }
+    .tab-btn{
+      font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:.86rem;font-weight:700;color:var(--c-ink3);
+      background:none;border:none;border-bottom:2px solid transparent;
+      padding:.75rem 1.1rem;cursor:none;margin-bottom:-1px;
+      transition:color .2s,border-color .2s;
+    }
+    .tab-btn:hover{color:var(--c-blue);}
+    .tab-btn.active{color:var(--c-blue);border-bottom-color:var(--c-blue);}
+    .tab-panel{display:none;animation:fadeUp .3s ease;}
+    .tab-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .tab-visual{
+      background:#fff;border:1px solid var(--c-border);border-radius:var(--r-lg);
+      aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;
+      font-size:5rem;position:relative;overflow:hidden;
+    }
+    .tab-visual::before{
+      content:'';position:absolute;inset:0;
+      background:var(--c-grad);opacity:.06;
+    }
+    .tab-info h3{font-size:1.7rem;font-weight:900;margin-bottom:.8rem;letter-spacing:-.02em;}
+    .tab-info p{font-size:.93rem;color:var(--c-ink2);line-height:1.78;margin-bottom:1.3rem;}
+    .feat-list{list-style:none;display:flex;flex-direction:column;gap:.55rem;}
+    .feat-list li{
+      display:flex;align-items:flex-start;gap:.7rem;
+      font-size:.88rem;color:var(--c-ink2);line-height:1.5;
+    }
+    .feat-list li::before{
+      content:'✓';
+      display:flex;align-items:center;justify-content:center;
+      width:20px;height:20px;min-width:20px;
+      background:var(--c-grad);color:#fff;
+      border-radius:50%;font-size:.7rem;font-weight:800;
+      margin-top:.05rem;
+    }
+
+    /* ════ WHY US ════ */
+    #why{background:#fff;}
+    .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+    .why-card{
+      background:var(--c-bg);border:1px solid var(--c-border);
+      border-radius:var(--r-lg);padding:1.8rem;
+      transition:all .3s;position:relative;overflow:hidden;
+    }
+    .why-card::after{
+      content:'';position:absolute;bottom:0;left:0;right:0;height:2.5px;
+      background:var(--c-grad);transform:scaleX(0);transform-origin:left;
+      transition:transform .35s;
+    }
+    .why-card:hover{transform:translateY(-5px);box-shadow:var(--shadow-md);background:#fff;}
+    .why-card:hover::after{transform:scaleX(1);}
+    .wc-num{
+      font-family:'Fraunces',serif;font-size:2.2rem;font-weight:900;
+      background:var(--c-grad);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text;
+      line-height:1;margin-bottom:.9rem;
+    }
+    .why-card h4{font-size:1rem;font-weight:900;margin-bottom:.4rem;letter-spacing:-.01em;}
+    .why-card p{font-size:.85rem;color:var(--c-ink2);line-height:1.7;}
+    .why-cta{
+      grid-column:1/-1;background:var(--c-ink);color:#fff;
+      border-radius:var(--r-lg);padding:1.8rem 2.2rem;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:2rem;flex-wrap:wrap;border:1px solid var(--c-ink);
+    }
+    .why-cta h4{color:#fff;font-size:1.2rem;}
+    .why-cta p{color:rgba(255,255,255,.55);font-size:.85rem;margin-top:.25rem;}
+    .btn-white{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:#fff;color:var(--c-ink);text-decoration:none;
+      padding:.7rem 1.6rem;border-radius:50px;font-weight:700;
+      font-size:.88rem;transition:all .25s;white-space:nowrap;flex-shrink:0;
+    }
+    .btn-white:hover{background:var(--c-blue);color:#fff;transform:translateY(-2px);box-shadow:0 6px 20px rgba(22,72,245,.35);}
+
+    /* ════ PROCESS ════ */
+    #process{background:var(--c-bg);}
+    .proc-steps{
+      display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;
+      position:relative;
+    }
+    .proc-steps::before{
+      content:'';position:absolute;top:26px;left:13%;right:13%;
+      height:1px;background:linear-gradient(90deg,var(--c-border),var(--c-blue),var(--c-border));
+      z-index:0;
+    }
+    .proc-step{text-align:center;position:relative;z-index:1;}
+    .proc-num{
+      width:52px;height:52px;border-radius:50%;background:var(--c-grad);
+      color:#fff;font-family:'Fraunces',serif;font-weight:900;font-size:1.1rem;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 1.1rem;
+      box-shadow:0 0 0 6px var(--c-bg),0 0 0 7px var(--c-border);
+      transition:box-shadow .3s;
+    }
+    .proc-step:hover .proc-num{box-shadow:0 0 0 6px rgba(22,72,245,.1),0 6px 20px rgba(22,72,245,.25);}
+    .proc-step h5{font-size:.97rem;font-weight:900;margin-bottom:.4rem;letter-spacing:-.01em;}
+    .proc-step p{font-size:.82rem;color:var(--c-ink2);line-height:1.65;}
+
+    /* ════ PARTNERSHIP ════ */
+    #partnership{background:var(--c-ink);overflow:hidden;position:relative;}
+    .part-glow{
+      position:absolute;inset:0;
+      background:
+        radial-gradient(ellipse 60% 70% at 50% 50%,rgba(14,165,233,.13),transparent 65%),
+        radial-gradient(ellipse 30% 35% at 5% 90%,rgba(22,72,245,.1),transparent 55%);
+    }
+    .part-grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);
+      background-size:48px 48px;
+    }
+    #partnership .s-eyebrow{color:var(--c-sky);}
+    #partnership .s-eyebrow::before{background:var(--c-sky);}
+    .part-badge{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);
+      border-radius:50px;padding:.4rem 1.1rem;font-size:.83rem;
+      font-weight:600;color:rgba(255,255,255,.8);transition:all .25s;cursor:default;
+    }
+    .part-badge:hover{background:rgba(22,72,245,.3);border-color:rgba(22,72,245,.45);}
+    .btn-ghost{
+      display:inline-flex;align-items:center;gap:.5rem;
+      background:rgba(255,255,255,.08);color:#fff;text-decoration:none;
+      padding:.78rem 1.8rem;border-radius:50px;font-weight:700;font-size:.9rem;
+      border:1px solid rgba(255,255,255,.15);transition:all .25s;
+    }
+    .btn-ghost:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.28);color:#fff;}
+
+    /* ════ CONTACT + MAP ════ */
+    #contact{background:#fff;}
+    .contact-card{
+      background:#fff;border:1px solid var(--c-border);
+      border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-md);
+    }
+    .contact-left{
+      background:var(--c-ink);color:#fff;padding:2.8rem;position:relative;overflow:hidden;
+    }
+    .contact-left::before{
+      content:'';position:absolute;
+      width:220px;height:220px;border-radius:50%;
+      background:radial-gradient(circle,rgba(14,165,233,.18),transparent 70%);
+      top:-50px;right:-50px;
+    }
+    .contact-left h3{font-size:1.55rem;font-weight:900;color:#fff;margin-bottom:.7rem;}
+    .contact-left p{font-size:.88rem;color:rgba(255,255,255,.55);line-height:1.75;margin-bottom:1.8rem;}
+    .ci{display:flex;align-items:flex-start;gap:.9rem;margin-bottom:1.1rem;}
+    .ci-ico{
+      width:36px;height:36px;min-width:36px;background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.1);border-radius:10px;
+      display:flex;align-items:center;justify-content:center;font-size:.88rem;
+    }
+    .ci-lbl{font-size:.7rem;color:rgba(255,255,255,.4);margin-bottom:.05rem;}
+    .ci-val{font-size:.87rem;color:#fff;font-weight:600;}
+    .c-social{display:flex;gap:.5rem;margin-top:1.8rem;}
+    .csoc{
+      width:34px;height:34px;background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.1);border-radius:8px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:.88rem;color:#fff;text-decoration:none;transition:all .2s;
+    }
+    .csoc:hover{background:var(--c-blue);border-color:var(--c-blue);color:#fff;transform:translateY(-2px);}
+
+    .contact-right{padding:2.8rem;}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .fg{margin-bottom:1.1rem;}
+    .fg label{
+      display:block;font-size:.78rem;font-weight:700;
+      color:var(--c-ink2);margin-bottom:.4rem;letter-spacing:.02em;
+    }
+    .fg input,.fg select,.fg textarea{
+      width:100%;background:var(--c-bg);border:1.5px solid var(--c-border);
+      border-radius:var(--r-sm);padding:.78rem 1rem;
+      font-size:.88rem;font-family:'Plus Jakarta Sans',sans-serif;
+      color:var(--c-ink);outline:none;transition:border-color .2s,box-shadow .2s;
+    }
+    .fg input:focus,.fg select:focus,.fg textarea:focus{
+      border-color:var(--c-blue);box-shadow:0 0 0 3px rgba(22,72,245,.1);
+    }
+    .fg textarea{resize:none;}
+    .btn-submit{
+      width:100%;background:var(--c-ink);color:#fff;border:none;
+      padding:.88rem;border-radius:var(--r-sm);font-size:.93rem;font-weight:700;
+      font-family:'Plus Jakarta Sans',sans-serif;cursor:none;
+      display:flex;align-items:center;justify-content:center;gap:.5rem;
+      transition:all .25s;
+    }
+    .btn-submit:hover{background:var(--c-blue);transform:translateY(-1px);box-shadow:0 6px 20px rgba(22,72,245,.3);}
+
+    /* ════ MAP SECTION ════ */
+    #map-section{background:var(--c-bg);}
+    .map-container{
+      border-radius:var(--r-xl);overflow:hidden;
+      border:1px solid var(--c-border);box-shadow:var(--shadow-md);
+      position:relative;
+    }
+    #map{height:440px;width:100%;z-index:1;}
+
+    /* Override leaflet popup to match brand */
+    .leaflet-popup-content-wrapper{
+      border-radius:var(--r-md) !important;
+      box-shadow:var(--shadow-lg) !important;
+      border:1px solid var(--c-border);
+      padding:0 !important;
+      overflow:hidden;
+    }
+    .leaflet-popup-content{margin:0 !important;min-width:220px;}
+    .leaflet-popup-tip-container{display:none;}
+    .map-popup{padding:1.2rem 1.4rem;}
+    .map-popup-logo{
+      font-family:'Fraunces',serif;font-weight:900;font-size:1.2rem;
+      background:var(--c-grad);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text;
+      margin-bottom:.3rem;
+    }
+    .map-popup-tag{font-size:.72rem;color:var(--c-ink3);margin-bottom:.8rem;}
+    .map-popup-addr{
+      display:flex;align-items:flex-start;gap:.5rem;
+      font-size:.82rem;color:var(--c-ink2);line-height:1.5;
+    }
+    .map-popup-addr i{color:var(--c-blue);margin-top:.1rem;font-size:.85rem;}
+    .map-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:rgba(22,72,245,.07);border:1px solid rgba(22,72,245,.15);
+      border-radius:50px;padding:.25rem .7rem;font-size:.72rem;font-weight:700;
+      color:var(--c-blue);margin-top:.8rem;
+    }
+    .map-badge-dot{width:5px;height:5px;background:var(--c-cyan);border-radius:50%;animation:blink 1.4s infinite;}
+
+    /* Custom Leaflet marker */
+    .custom-marker{
+      width:40px;height:40px;background:var(--c-grad);
+      border-radius:50% 50% 50% 0;transform:rotate(-45deg);
+      border:3px solid #fff;box-shadow:0 4px 16px rgba(22,72,245,.35);
+      display:flex;align-items:center;justify-content:center;
+    }
+    .custom-marker-inner{
+      width:16px;height:16px;background:#fff;border-radius:50%;
+      transform:rotate(45deg);
+    }
+
+    /* ════ FOOTER ════ */
+    footer{background:#fff;border-top:1px solid var(--c-border);padding:3.5rem 0 2rem;}
+    .foot-logo{
+      font-family:'Fraunces',serif;font-weight:900;font-size:1.5rem;
+      background:var(--c-grad);-webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;background-clip:text;
+    }
+    .foot-tag{font-size:.8rem;color:var(--c-ink3);margin-top:.2rem;}
+    .foot-desc{font-size:.84rem;color:var(--c-ink2);line-height:1.72;max-width:250px;margin:1rem 0;}
+    .foot-h{
+      font-family:'Plus Jakarta Sans',sans-serif;
+      font-size:.71rem;font-weight:800;letter-spacing:.1em;
+      text-transform:uppercase;color:var(--c-ink3);margin-bottom:.9rem;
+    }
+    .foot-a{
+      display:block;font-size:.86rem;color:var(--c-ink2);
+      text-decoration:none;margin-bottom:.45rem;
+      font-weight:500;transition:color .2s;
+    }
+    .foot-a:hover{color:var(--c-blue);}
+    .foot-bottom{
+      border-top:1px solid var(--c-border);margin-top:2.5rem;padding-top:1.4rem;
+      display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem;
+    }
+    .foot-bottom p{font-size:.8rem;color:var(--c-ink3);}
+
+    /* Toast */
+    #toast{
+      position:fixed;bottom:2rem;right:2rem;z-index:9999;
+      background:#fff;border:1px solid #d1fae5;border-radius:var(--r-md);
+      padding:1rem 1.4rem;display:flex;align-items:center;gap:.8rem;
+      box-shadow:0 8px 30px rgba(0,0,0,.1);
+      transform:translateX(120%);transition:transform .4s cubic-bezier(.34,1.56,.64,1);
+    }
+    #toast.show{transform:translateX(0);}
+    #toast .t-msg{font-size:.88rem;font-weight:600;color:var(--c-ink);}
+    #toast .t-sub{font-size:.75rem;color:var(--c-ink3);}
+
+    /* Responsive */
+    @media(max-width:991px){
+      .tab-panel.active{grid-template-columns:1fr;}
+      .tab-visual{display:none;}
+      .why-grid{grid-template-columns:1fr 1fr;}
+      .proc-steps{grid-template-columns:1fr 1fr;gap:1.5rem;}
+      .proc-steps::before{display:none;}
+      .frow{grid-template-columns:1fr;}
+      .contact-left{padding:2rem;}
+      .contact-right{padding:2rem;}
+      #cursor-dot,#cursor-ring{display:none;}
+      body{cursor:auto;}
+    }
+    @media(max-width:767px){
+      .why-grid{grid-template-columns:1fr;}
+      .why-cta{flex-direction:column;align-items:flex-start;}
+      .nav-links{display:none;}
+      .hamburger{display:block;}
+      #map{height:320px;}
+    }
+    @media(max-width:575px){
+      .hero-h1{font-size:2.6rem;}
+      .proc-steps{grid-template-columns:1fr;}
+    }
+    .profile{
+      width:100%;height:220px;background:var(--c-border);
+      border-radius:var(--r-lg);margin-bottom:1.2rem;
+      background-image:url('flex.png');background-size:cover;background-position:center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Mobile nav -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="menu-close" id="menuClose"><i class="bi bi-x-lg"></i></button>
+  <a href="#about"       onclick="closeMob()">About</a>
+  <a href="#services"    onclick="closeMob()">Services</a>
+  <a href="#why"         onclick="closeMob()">Why Us</a>
+  <a href="#process"     onclick="closeMob()">Process</a>
+  <a href="#contact"     onclick="closeMob()">Contact</a>
+  <a href="#partnership" class="btn-dark" onclick="closeMob()">Partner With Us</a>
+</div>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav id="navbar">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#hero">
+      <img src="flex.png" alt="Flex"
+           onerror="this.style.display='none'"/>
+      <span class="nav-logo-text"></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="d-flex align-items-center gap-3">
+      <a href="#partnership" class="nav-cta d-none d-md-inline-block">Partner With Us →</a>
+      <button class="hamburger d-md-none" id="hamburger"><i class="bi bi-list"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section id="hero">
+  <div class="hero-mesh"></div>
+  <div class="hero-dots"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+
+      <div class="col-lg-6">
+        <div class="hero-badge"><span class="hero-dot"></span>IT Startup · Batangas, PH</div>
+        <h1 class="hero-h1">
+          Build Smarter.<br/>
+          <em class="gradient-text" style="font-style:italic;">Grow Faster.</em><br/>
+          With Flex.
+        </h1>
+        <p class="hero-sub">
+          We design and build custom websites and digital solutions that help businesses of all sizes thrive in the modern world. Your vision — our technology.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="#services" class="btn-dark">Explore Services <i class="bi bi-arrow-right"></i></a>
+          <a href="#partnership" class="btn-outline"><i class="bi bi-handshake"></i> Partner With Us</a>
+        </div>
+        <div class="hero-stats">
+          <div>
+            <div class="stat-val">IT</div>
+            <div class="stat-lbl">Startup Company</div>
+          </div>
+          <div>
+            <div class="stat-val">PH</div>
+            <div class="stat-lbl">Based in Batangas</div>
+          </div>
+          <div>
+            <div class="stat-val">∞</div>
+            <div class="stat-lbl">Ready to Scale</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="hero-visual">
+          <div class="h-chip chip-a">
+            <span>🚀</span> Website Launched
+            <span class="chk"><i class="bi bi-check"></i></span>
+          </div>
+          <div class="mockup">
+            <div class="mbar">
+              <div class="m-r"></div><div class="m-y"></div><div class="m-g"></div>
+              <div class="murl">flex.vercel.app</div>
+            </div>
+            <div class="mbody">
+              <div class="profile"><img src="flex.png" alt="joms"></div>
+              <div class="mcards">
+                <div class="mcard"><div class="mcard-ico">🌐</div><div class="mcard-line"></div><div class="mcard-line s"></div></div>
+                <div class="mcard"><div class="mcard-ico">📈</div><div class="mcard-line"></div><div class="mcard-line s"></div></div>
+                <div class="mcard"><div class="mcard-ico">🎨</div><div class="mcard-line"></div><div class="mcard-line s"></div></div>
+              </div>
+              <div class="mrow">
+                <div class="mstat"><div class="mstat-n">Fast</div><div class="mstat-l">Performance</div></div>
+                <div class="mstat"><div class="mstat-n">Safe</div><div class="mstat-l">Secure Build</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="h-chip chip-b">
+            <span>✅</span> Client Approved!
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ MARQUEE ══════════════════ -->
+<div class="marquee-wrap">
+  <div class="marquee-label">Technologies & Platforms We Work With</div>
+  <div style="overflow:hidden;">
+    <div class="mq-track">
+      <div class="mq-item"><i class="bi bi-code-slash"></i> React.js</div>
+      <div class="mq-item"><i class="bi bi-server"></i> Node.js</div>
+      <div class="mq-item"><i class="bi bi-wordpress"></i> WordPress</div>
+      <div class="mq-item"><i class="bi bi-database"></i> MySQL</div>
+      <div class="mq-item"><i class="bi bi-cloud"></i> Firebase</div>
+      <div class="mq-item"><i class="bi bi-cart4"></i> Shopify</div>
+      <div class="mq-item"><i class="bi bi-shield-check"></i> Laravel</div>
+      <div class="mq-item"><i class="bi bi-globe"></i> Next.js</div>
+      <div class="mq-item"><i class="bi bi-lightning"></i> Tailwind CSS</div>
+      <div class="mq-item"><i class="bi bi-phone"></i> React Native</div>
+      <div class="mq-item"><i class="bi bi-boxes"></i> Vue.js</div>
+      <div class="mq-item"><i class="bi bi-filetype-php"></i> PHP</div>
+      <!-- duplicate -->
+      <div class="mq-item"><i class="bi bi-code-slash"></i> React.js</div>
+      <div class="mq-item"><i class="bi bi-server"></i> Node.js</div>
+      <div class="mq-item"><i class="bi bi-wordpress"></i> WordPress</div>
+      <div class="mq-item"><i class="bi bi-database"></i> MySQL</div>
+      <div class="mq-item"><i class="bi bi-cloud"></i> Firebase</div>
+      <div class="mq-item"><i class="bi bi-cart4"></i> Shopify</div>
+      <div class="mq-item"><i class="bi bi-shield-check"></i> Laravel</div>
+      <div class="mq-item"><i class="bi bi-globe"></i> Next.js</div>
+      <div class="mq-item"><i class="bi bi-lightning"></i> Tailwind CSS</div>
+      <div class="mq-item"><i class="bi bi-phone"></i> React Native</div>
+      <div class="mq-item"><i class="bi bi-boxes"></i> Vue.js</div>
+      <div class="mq-item"><i class="bi bi-filetype-php"></i> PHP</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ABOUT ══════════════════ -->
+<section id="about">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5 reveal">
+        <div class="s-eyebrow">Who We Are</div>
+        <h2 class="s-title">A startup built to make tech <em class="gradient-text">accessible.</em></h2>
+        <p class="s-desc">Flex is an IT startup based in Batangas, Philippines. We're a team passionate about helping businesses — from emerging startups to growing enterprises — build a strong, effective digital presence.</p>
+        <p class="s-desc mt-3">Our goal is simple: make great technology accessible to every business. We combine technical expertise with creative thinking to deliver solutions that drive real, measurable growth.</p>
+        <a href="#contact" class="btn-dark mt-4 d-inline-flex">Start a Conversation <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="col-lg-7">
+        <div class="row g-3">
+          <div class="col-6 reveal d1">
+            <div class="about-card">
+              <div class="ac-ico">🚀</div>
+              <h5>Startup Mindset</h5>
+              <p>We move fast, learn faster. Our lean approach means you get high-quality results without unnecessary overhead.</p>
+            </div>
+          </div>
+          <div class="col-6 reveal d2">
+            <div class="about-card">
+              <div class="ac-ico">🎯</div>
+              <h5>Results-Driven</h5>
+              <p>Every decision is aligned with your goals. We measure success by your growth, not just delivery milestones.</p>
+            </div>
+          </div>
+          <div class="col-6 reveal d3">
+            <div class="about-card">
+              <div class="ac-ico">🤝</div>
+              <h5>Partnership First</h5>
+              <p>We treat every client as a long-term partner. Your journey doesn't end at launch — it's just the beginning.</p>
+            </div>
+          </div>
+          <div class="col-6 reveal d4">
+            <div class="about-card">
+              <div class="ac-ico">⚡</div>
+              <h5>Fast & Transparent</h5>
+              <p>Clear communication, realistic timelines, and no hidden surprises. You're always in the loop.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ SERVICES ══════════════════ -->
+<section id="services">
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-lg-6 reveal">
+        <div class="s-eyebrow">What We Offer</div>
+        <h2 class="s-title">Services built for <em class="gradient-text">modern business.</em></h2>
+      </div>
+      <div class="col-lg-6 d-flex align-items-end reveal d2">
+        <p class="s-desc">From design to deployment and beyond — we cover everything your business needs to thrive digitally.</p>
+      </div>
+    </div>
+
+    <div class="tab-row reveal">
+      <button class="tab-btn active" data-tab="web">🌐 Web Development</button>
+      <button class="tab-btn" data-tab="design">🎨 UI/UX Design</button>
+      <button class="tab-btn" data-tab="biz">💼 Business Solutions</button>
+      <button class="tab-btn" data-tab="support">🛠️ IT Support</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-web">
+      <div class="tab-visual"><img src="backend-coding.png" alt="Web Development"></div>
+      <div class="tab-info">
+        <h3>Custom Website Development</h3>
+        <p>We build fully custom, scalable web applications tailored to your specific business goals — no templates, no shortcuts. Clean code, fast performance, and future-ready architecture from day one.</p>
+        <ul class="feat-list">
+          <li>Full-stack custom web applications</li>
+          <li>E-commerce & online store development</li>
+          <li>API integrations and third-party services</li>
+          <li>Mobile-responsive and SEO-optimized builds</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-design">
+      <div class="tab-visual"><img src="design.png" alt="UI/UX"></div>
+      <div class="tab-info">
+        <h3>Web Design & UI/UX</h3>
+        <p>Stunning, conversion-focused designs that make your brand unforgettable. We craft interfaces that are not just beautiful but deeply intuitive — guiding your users toward action.</p>
+        <ul class="feat-list">
+          <li>Brand-aligned visual identity design</li>
+          <li>User research & wireframing</li>
+          <li>Interactive Figma prototypes</li>
+          <li>Conversion rate optimization</li>
+          <li>Accessibility-first design principles</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-biz">
+      <div class="tab-visual"><img src="cooperation.png" alt="business solution"></div>
+      <div class="tab-info">
+        <h3>Business Digital Solutions</h3>
+        <p>End-to-end digital transformation that modernizes how your business operates — from customer-facing platforms to internal workflows, dashboards, and automation tools.</p>
+        <ul class="feat-list">
+          <li>Business process digitization</li>
+          <li>Custom dashboards & data analytics</li>
+          <li>Booking, CRM & management systems</li>
+          <li>Payment gateway integration</li>
+          <li>Digital marketing tech stack setup</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-support">
+      <div class="tab-visual"><img src="online-service.png" alt="IT support"></div>
+      <div class="tab-info">
+        <h3>IT Support & Maintenance</h3>
+        <p>We keep your digital products running at peak performance. From security patches to feature updates — your business is always covered, always online.</p>
+        <ul class="feat-list">
+          <li>Proactive security monitoring & updates</li>
+          <li>Performance audits & optimization</li>
+          <li>Bug fixing & technical troubleshooting</li>
+          <li>Hosting, domain & SSL management</li>
+          <li>Ongoing feature development</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ WHY US ══════════════════ -->
+<section id="why">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="s-eyebrow justify-content-center reveal">Our Edge</div>
+      <h2 class="s-title reveal">Why businesses choose <em class="gradient-text">Flex.</em></h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card reveal d1">
+        <div class="wc-num">01</div>
+        <h4>100% Custom-Built</h4>
+        <p>Every solution is crafted from scratch to match your brand and goals. No cookie-cutter templates — ever.</p>
+      </div>
+      <div class="why-card reveal d2">
+        <div class="wc-num">02</div>
+        <h4>Startup-Friendly Pricing</h4>
+        <p>Fair, honest pricing with full transparency. We scale our services to fit budgets of every size — from MVPs to enterprise builds.</p>
+      </div>
+      <div class="why-card reveal d3">
+        <div class="wc-num">03</div>
+        <h4>You Stay in Control</h4>
+        <p>Regular updates, live previews, and open communication throughout every stage. You're a partner, not just a client.</p>
+      </div>
+      <div class="why-card reveal d1">
+        <div class="wc-num">04</div>
+        <h4>Speed Without Compromise</h4>
+        <p>We deliver on time without cutting corners. Lean processes and an experienced team mean faster results, better quality.</p>
+      </div>
+      <div class="why-card reveal d2">
+        <div class="wc-num">05</div>
+        <h4>Post-Launch Support</h4>
+        <p>Our relationship doesn't end at launch. We provide ongoing maintenance, updates, and growth support as your needs evolve.</p>
+      </div>
+      <div class="why-cta reveal d3">
+        <div>
+          <h4>We're not just a vendor —</h4>
+          <p>we're your long-term digital growth partner.</p>
+        </div>
+        <a href="#partnership" class="btn-white">Start a Partnership →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ PROCESS ══════════════════ -->
+<section id="process">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="s-eyebrow justify-content-center reveal">How We Work</div>
+      <h2 class="s-title reveal">From idea to <em class="gradient-text">live website.</em></h2>
+      <p class="s-desc mx-auto reveal d2">A clear, collaborative process that keeps you informed and in control at every step.</p>
+    </div>
+    <div class="proc-steps">
+      <div class="proc-step reveal d1">
+        <div class="proc-num">01</div>
+        <h5>Discovery & Strategy</h5>
+        <p>We learn your business goals, target audience, and project requirements through an in-depth consultation.</p>
+      </div>
+      <div class="proc-step reveal d2">
+        <div class="proc-num">02</div>
+        <h5>Design & Prototype</h5>
+        <p>Our designers create wireframes and interactive Figma prototypes for your review and approval before any code is written.</p>
+      </div>
+      <div class="proc-step reveal d3">
+        <div class="proc-num">03</div>
+        <h5>Build & Test</h5>
+        <p>We develop your product with clean, maintainable code — followed by rigorous QA testing across all devices and browsers.</p>
+      </div>
+      <div class="proc-step reveal d4">
+        <div class="proc-num">04</div>
+        <h5>Launch & Support</h5>
+        <p>We deploy your product, monitor performance post-launch, and remain available as your business grows and scales.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ PARTNERSHIP ══════════════════ -->
+<section id="partnership">
+  <div class="part-glow"></div>
+  <div class="part-grid"></div>
+  <div class="container position-relative text-center" style="padding-top:1rem;padding-bottom:1rem;">
+    <div class="s-eyebrow justify-content-center reveal">Collaborate With Us</div>
+    <h2 class="s-title reveal" style="color:#fff;max-width:580px;margin:0 auto .9rem;">
+      Let's build your digital future <em class="gradient-text">together.</em>
+    </h2>
+    <p class="s-desc mx-auto reveal d2" style="color:rgba(255,255,255,.5);max-width:540px;">
+      Whether you're a startup with a bold idea, an entrepreneur ready to go digital, or a company looking to innovate — Flex is ready to be your technology partner.
+    </p>
+    <div class="d-flex gap-2 flex-wrap justify-content-center my-4 reveal d2">
+      <span class="part-badge">🚀 Startups</span>
+      <span class="part-badge">💡 Website Design</span>
+      <span class="part-badge">🏢 Applications</span>
+      <span class="part-badge">🌐 E-commerce</span>
+    </div>
+    <div class="d-flex gap-3 justify-content-center flex-wrap reveal d3">
+      <a href="#contact" class="btn-white">Get In Touch <i class="bi bi-arrow-right"></i></a>
+      <a href="#services" class="btn-ghost">Our Services</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ CONTACT ══════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="s-eyebrow justify-content-center reveal">Get In Touch</div>
+      <h2 class="s-title reveal">Let's make something <em class="gradient-text">great.</em></h2>
+      <p class="s-desc mx-auto reveal d2">Have a project in mind? Tell us about it. We respond within 24 hours.</p>
+    </div>
+
+    <div class="contact-card reveal">
+      <div class="row g-0">
+        <div class="col-lg-5">
+          <div class="contact-left h-100">
+            <h3>Contact Information</h3>
+            <p>Fill out the form and our team will be in touch shortly. We'd love to hear about your project!</p>
+            <div class="ci">
+              <div class="ci-ico">📧</div>
+              <div><div class="ci-lbl">Email</div><div class="ci-val">flex@gmail.com</div></div>
+            </div>
+            <div class="ci">
+              <div class="ci-ico">📞</div>
+              <div><div class="ci-lbl">Phone</div><div class="ci-val">+63 912 345 6789</div></div>
+            </div>
+            <div class="ci">
+              <div class="ci-ico">📍</div>
+              <div><div class="ci-lbl">Location</div><div class="ci-val">Batangas, Philippines</div></div>
+            </div>
+            <div class="ci">
+              <div class="ci-ico">🕐</div>
+              <div><div class="ci-lbl">Office Hours</div><div class="ci-val">Mon–Fri, 9AM–6PM PHT</div></div>
+            </div>
+            <div class="c-social">
+              <a href="#" class="csoc"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="csoc"><i class="bi bi-twitter-x"></i></a>
+              <a href="#" class="csoc"><i class="bi bi-instagram"></i></a>
+              <a href="#" class="csoc"><i class="bi bi-linkedin"></i></a>
+              <a href="#" class="csoc"><i class="bi bi-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="contact-right">
+            <form id="contactForm">
+              <div class="frow">
+                <div class="fg">
+                  <label>Full Name *</label>
+                  <input type="text" placeholder="Juan dela Cruz" required/>
+                </div>
+                <div class="fg">
+                  <label>Email Address *</label>
+                  <input type="email" placeholder="you@company.com" required/>
+                </div>
+              </div>
+              <div class="frow">
+                <div class="fg">
+                  <label>Company</label>
+                  <input type="text" placeholder="Your Company"/>
+                </div>
+                <div class="fg">
+                  <label>Phone Number</label>
+                  <input type="tel" placeholder="+63 9XX XXX XXXX"/>
+                </div>
+              </div>
+              <div class="frow">
+                <div class="fg">
+                  <label>Service Needed</label>
+                  <select>
+                    <option value="">Select a service…</option>
+                    <option>Custom Website Development</option>
+                    <option>Web Design & UI/UX</option>
+                    <option>Business Digital Solutions</option>
+                    <option>IT Support & Maintenance</option>
+                    <option>Partnership / Collaboration</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label>Budget Range</label>
+                  <select>
+                    <option value="">Select a range…</option>
+                    <option>Below ₱20,000</option>
+                    <option>₱20,000 – ₱50,000</option>
+                    <option>₱50,000 – ₱150,000</option>
+                    <option>₱150,000+</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fg">
+                <label>Tell us about your project *</label>
+                <textarea rows="4" placeholder="Describe your project, goals, and any specific requirements…" required></textarea>
+              </div>
+              <button type="submit" class="btn-submit">
+                Send Message <i class="bi bi-send"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ MAP ══════════════════ -->
+<section id="map-section">
+  <div class="container">
+    <div class="row align-items-center mb-4">
+      <div class="col-lg-6 reveal">
+        <div class="s-eyebrow">Find Us</div>
+        <h2 class="s-title mb-0">We're based in <em class="gradient-text">Batangas.</em></h2>
+      </div>
+      <div class="col-lg-6 reveal d2">
+        <p class="s-desc">Come visit us or reach out online — we're always happy to connect with businesses and entrepreneurs looking to grow digitally.</p>
+      </div>
+    </div>
+    <div class="map-container reveal">
+      <div id="map"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="foot-logo">Flex</div>
+        <div class="foot-tag">Innovate • Connect • Grow</div>
+        <p class="foot-desc">Building the digital future, one business at a time. From startups to enterprises — we make great tech accessible.</p>
+        <div class="d-flex gap-2">
+          <a href="#" class="csoc" style="background:var(--c-bg);border-color:var(--c-border);color:var(--c-ink2);"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="csoc" style="background:var(--c-bg);border-color:var(--c-border);color:var(--c-ink2);"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="csoc" style="background:var(--c-bg);border-color:var(--c-border);color:var(--c-ink2);"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="csoc" style="background:var(--c-bg);border-color:var(--c-border);color:var(--c-ink2);"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Company</div>
+        <a href="#about" class="foot-a">About Us</a>
+        <a href="#services" class="foot-a">Services</a>
+        <a href="#process" class="foot-a">Our Process</a>
+        <a href="#contact" class="foot-a">Contact</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Services</div>
+        <a href="#services" class="foot-a">Web Development</a>
+        <a href="#services" class="foot-a">UI/UX Design</a>
+        <a href="#services" class="foot-a">Business Solutions</a>
+        <a href="#services" class="foot-a">IT Support</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Partner</div>
+        <a href="#" class="foot-a">For Startups</a>
+        <a href="#" class="foot-a">For Enterprises</a>
+        <a href="#" class="foot-a">For Agencies</a>
+        <a href="#contact" class="foot-a">Get a Quote</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Legal</div>
+        <a href="#" class="foot-a">Privacy Policy</a>
+        <a href="#" class="foot-a">Terms of Service</a>
+        <a href="#" class="foot-a">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>© 2026 Flex Technologies. All rights reserved.</p>
+      <p>Made with <span style="color:var(--c-blue)">♥</span> in Batangas, Philippines</p>
+    </div>
+  </div>
+</footer>
+
+<div id="toast">
+  <span style="font-size:1.3rem;">✅</span>
+  <div>
+    <div class="t-msg">Message sent!</div>
+    <div class="t-sub">We'll reply within 24 hours.</div>
+  </div>
+</div>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ── Custom Cursor ── */
+const dot = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  dot.style.left = mx+'px'; dot.style.top = my+'px';
+});
+(function tick(){
+  rx += (mx-rx)*.13; ry += (my-ry)*.13;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(tick);
+})();
+
+/* ── Navbar ── */
+const navbar = document.getElementById('navbar');
+function onScroll(){
+  navbar.classList.toggle('scrolled', scrollY > 60);
+  document.querySelectorAll('section[id]').forEach(sec => {
+    const link = document.querySelector(`.nav-links a[href="#${sec.id}"]`);
+    if(link) link.classList.toggle('active',
+      scrollY >= sec.offsetTop-110 && scrollY < sec.offsetTop+sec.offsetHeight-110);
+  });
+}
+window.addEventListener('scroll', onScroll);
+
+/* ── Mobile Menu ── */
+const mMenu = document.getElementById('mobileMenu');
+document.getElementById('hamburger').onclick = () => mMenu.classList.add('open');
+document.getElementById('menuClose').onclick = () => mMenu.classList.remove('open');
+function closeMob(){ mMenu.classList.remove('open'); }
+
+/* ── Scroll Reveal ── */
+const io = new IntersectionObserver(
+  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('up'); }),
+  { threshold: 0.1 }
+);
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── Services Tabs ── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ── Contact Form ── */
+document.getElementById('contactForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4500);
+  e.target.reset();
+});
+
+/* ── Smooth Scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if(id.length > 1){
+      const el = document.querySelector(id);
+      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+    }
+  });
+});
+
+/* ── Leaflet Map ── */
+// Batngas coordinates
+const BATANGAS = [13.7563, 121.0584];
+
+const map = L.map('map', {
+  center: BATANGAS,
+  zoom: 15,
+  zoomControl: false,
+  scrollWheelZoom: false,
+  attributionControl: true,
+});
+
+// Clean tile layer - CartoDB Positron (light, minimal)
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd',
+  maxZoom: 20,
+}).addTo(map);
+
+// Add zoom control in bottom-right
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// Custom marker icon using DivIcon
+const markerIcon = L.divIcon({
+  html: `
+    <div style="
+      width:44px;height:44px;
+      background:linear-gradient(135deg,#1648f5 0%,#0ea5e9 55%,#06d6a0 100%);
+      border-radius:50% 50% 50% 0;
+      transform:rotate(-45deg);
+      border:3px solid #fff;
+      box-shadow:0 4px 20px rgba(22,72,245,.4);
+      display:flex;align-items:center;justify-content:center;
+    ">
+      <div style="
+        width:14px;height:14px;background:#fff;border-radius:50%;
+        transform:rotate(45deg);
+      "></div>
+    </div>`,
+  className: '',
+  iconSize: [44, 44],
+  iconAnchor: [22, 44],
+  popupAnchor: [0, -48],
+});
+
+// Custom popup content
+const popupContent = `
+  <div class="map-popup">
+    <div class="map-popup-logo">Flex</div>
+    <div class="map-popup-tag">IT Startup Company</div>
+    <div class="map-popup-addr">
+      <i class="bi bi-geo-alt-fill"></i>
+      <span>Batangas, Philippines<br/>Batangas City, PH 4200</span>
+    </div>
+    <div class="map-badge">
+      <span class="map-badge-dot"></span>
+      Open · Mon–Fri, 9AM–6PM
+    </div>
+  </div>`;
+
+// Place marker
+L.marker(BATANGAS, { icon: markerIcon })
+  .addTo(map)
+  .bindPopup(popupContent, {
+    maxWidth: 240,
+    closeButton: true,
+    className: 'flex-popup',
+  })
+  .openPopup();
+
+// Draw a subtle circle around location
+L.circle(BATANGAS, {
+  color: '#1648f5',
+  fillColor: '#0ea5e9',
+  fillOpacity: 0.06,
+  weight: 1.5,
+  dashArray: '6 4',
+  radius: 300,
+}).addTo(map);
+
+// Animate map entry — fly in on scroll into view
+const mapObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      setTimeout(() => {
+        map.flyTo(BATANGAS, 15, { duration: 1.5, easeLinearity: 0.25 });
+      }, 300);
+      mapObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+mapObserver.observe(document.getElementById('map'));
+</script>
+</body>
+</html>
