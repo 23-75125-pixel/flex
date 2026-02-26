@@ -111,23 +111,117 @@
     .nav-cta:hover{background:var(--c-blue);transform:translateY(-1px);box-shadow:0 4px 16px rgba(22,72,245,.3);color:#fff;}
     .hamburger{display:none;background:none;border:none;cursor:none;font-size:1.5rem;color:var(--c-ink);}
 
-    /* Mobile menu */
+    /* Mobile menu - FIXED VERSION */
     .mobile-menu{
-      position:fixed;inset:0;background:rgba(247,249,252,.97);
-      backdrop-filter:blur(20px);z-index:999;
-      display:flex;flex-direction:column;align-items:center;
-      justify-content:center;gap:1.8rem;
-      transform:translateX(100%);transition:transform .35s ease;
+      position:fixed;
+      top:0;
+      right:0;
+      width:100%;
+      height:100vh;
+      background:rgba(10,15,30,0.98);
+      backdrop-filter:blur(10px);
+      z-index:9999;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:2rem;
+      transform:translateX(100%);
+      transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      visibility:hidden;
     }
-    .mobile-menu.open{transform:translateX(0);}
+    .mobile-menu.open{
+      transform:translateX(0);
+      visibility:visible;
+    }
     .mobile-menu a{
-      font-size:1.6rem;font-family:'Fraunces',serif;font-weight:900;
-      color:var(--c-ink);text-decoration:none;transition:color .2s;
+      font-size:1.8rem;
+      font-family:'Fraunces',serif;
+      font-weight:700;
+      color:rgba(255,255,255,0.8);
+      text-decoration:none;
+      padding:0.5rem 2rem;
+      border-radius:50px;
+      transition:all 0.2s ease;
+      opacity:0;
+      transform:translateY(20px);
     }
-    .mobile-menu a:hover{color:var(--c-blue);}
+    .mobile-menu.open a{
+      opacity:1;
+      transform:translateY(0);
+    }
+    .mobile-menu a:nth-child(2){transition-delay:0.1s;}
+    .mobile-menu a:nth-child(3){transition-delay:0.15s;}
+    .mobile-menu a:nth-child(4){transition-delay:0.2s;}
+    .mobile-menu a:nth-child(5){transition-delay:0.25s;}
+    .mobile-menu a:nth-child(6){transition-delay:0.3s;}
+    .mobile-menu a:nth-child(7){transition-delay:0.35s;}
+    
+    /* Hover and active states for mobile menu */
+    .mobile-menu a:hover,
+    .mobile-menu a:active,
+    .mobile-menu a:focus {
+      color:#ffffff;
+      background:var(--c-grad);
+      transform:scale(1.05);
+    }
+    
+    /* Active/current page indicator */
+    .mobile-menu a.active {
+      color:#ffffff;
+      background:var(--c-grad);
+    }
+    
     .menu-close{
-      position:absolute;top:1.5rem;right:1.5rem;
-      background:none;border:none;font-size:1.6rem;cursor:pointer;color:var(--c-ink);
+      position:absolute;
+      top:1.5rem;
+      right:1.5rem;
+      width:48px;
+      height:48px;
+      background:rgba(255,255,255,0.1);
+      border:1px solid rgba(255,255,255,0.2);
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.5rem;
+      color:#ffffff;
+      cursor:pointer;
+      transition:all 0.2s ease;
+      z-index:10000;
+    }
+    .menu-close:hover,
+    .menu-close:active {
+      background:var(--c-grad);
+      border-color:transparent;
+      transform:rotate(90deg);
+    }
+    
+    /* Mobile menu overlay effect */
+    .mobile-menu.open::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at 20% 50%, rgba(22,72,245,0.15) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    
+    /* Partner button in mobile menu */
+    .mobile-menu .btn-dark {
+      background:var(--c-grad);
+      color:#ffffff;
+      padding:0.8rem 2.5rem;
+      font-size:1.2rem;
+      border:none;
+      margin-top:1rem;
+    }
+    .mobile-menu .btn-dark:hover,
+    .mobile-menu .btn-dark:active {
+      transform:scale(1.05);
+      box-shadow:0 10px 30px rgba(22,72,245,0.4);
     }
 
     /* ════ SECTION BASE ════ */
@@ -605,7 +699,7 @@
     #toast .t-msg{font-size:.88rem;font-weight:600;color:var(--c-ink);}
     #toast .t-sub{font-size:.75rem;color:var(--c-ink3);}
 
-    /* Responsive */
+    /* Responsive - FIXED MOBILE STYLES */
     @media(max-width:991px){
       .tab-panel.active{grid-template-columns:1fr;}
       .tab-visual{display:none;}
@@ -624,15 +718,52 @@
       .nav-links{display:none;}
       .hamburger{display:block;}
       #map{height:320px;}
+      
+      /* Mobile menu responsive adjustments */
+      .mobile-menu a {
+        font-size: 1.5rem;
+        padding: 0.5rem 1.5rem;
+      }
+      .menu-close {
+        top: 1rem;
+        right: 1rem;
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+      .mobile-menu .btn-dark {
+        padding: 0.7rem 2rem;
+        font-size: 1.1rem;
+      }
     }
     @media(max-width:575px){
       .hero-h1{font-size:2.6rem;}
       .proc-steps{grid-template-columns:1fr;}
+      
+      /* Further mobile menu adjustments */
+      .mobile-menu a {
+        font-size: 1.3rem;
+        padding: 0.4rem 1.2rem;
+      }
     }
     .profile{
       width:100%;height:220px;background:var(--c-border);
       border-radius:var(--r-lg);margin-bottom:1.2rem;
       background-image:url('flex.png');background-size:cover;background-position:center;
+    }
+
+    /* ===== HONEYPOT FIELD - hidden from real users but visible to bots ===== */
+    .honeypot-field {
+      display: none !important;
+      visibility: hidden !important;
+      opacity: 0 !important;
+      position: absolute !important;
+      top: -9999px !important;
+      left: -9999px !important;
+      height: 0 !important;
+      width: 0 !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
     }
   </style>
 </head>
@@ -641,14 +772,15 @@
 <div id="cursor-dot"></div>
 <div id="cursor-ring"></div>
 
-<!-- Mobile nav -->
+<!-- Mobile nav - FIXED VERSION -->
 <div class="mobile-menu" id="mobileMenu">
-  <button class="menu-close" id="menuClose"><i class="bi bi-x-lg"></i></button>
-  <a href="#about"       onclick="closeMob()">About</a>
-  <a href="#services"    onclick="closeMob()">Services</a>
-  <a href="#why"         onclick="closeMob()">Why Us</a>
-  <a href="#process"     onclick="closeMob()">Process</a>
-  <a href="#contact"     onclick="closeMob()">Contact</a>
+  <button class="menu-close" id="menuClose" aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
+  <a href="#hero" onclick="closeMob()">Home</a>
+  <a href="#about" onclick="closeMob()">About</a>
+  <a href="#services" onclick="closeMob()">Services</a>
+  <a href="#why" onclick="closeMob()">Why Us</a>
+  <a href="#process" onclick="closeMob()">Process</a>
+  <a href="#contact" onclick="closeMob()">Contact</a>
   <a href="#partnership" class="btn-dark" onclick="closeMob()">Partner With Us</a>
 </div>
 
@@ -669,7 +801,7 @@
     </ul>
     <div class="d-flex align-items-center gap-3">
       <a href="#partnership" class="nav-cta d-none d-md-inline-block">Partner With Us →</a>
-      <button class="hamburger d-md-none" id="hamburger"><i class="bi bi-list"></i></button>
+      <button class="hamburger d-md-none" id="hamburger" aria-label="Menu"><i class="bi bi-list"></i></button>
     </div>
   </div>
 </nav>
@@ -1048,31 +1180,48 @@
         </div>
         <div class="col-lg-7">
           <div class="contact-right">
-            <form id="contactForm">
+            <!-- Web3Forms + Honeypot enabled form -->
+            <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+              <!-- Web3Forms Access Key (replace with your own) -->
+              <input type="hidden" name="access_key" value="19d4628c-2422-40c3-b558-e1fac65805c7">
+
+              <!-- Honeypot field (invisible to real users) -->
+              <div class="honeypot-field">
+                <label for="honeypot">Do not fill this field</label>
+                <input type="text" name="honeypot" id="honeypot" autocomplete="off" tabindex="-1">
+              </div>
+
+              <!-- Optional: reCAPTCHA bypass (if you want to disable) -->
+              <input type="hidden" name="recaptcha" value="false">
+
+              <!-- Redirect / success page? we keep AJAX style with toast -->
+              <input type="hidden" name="subject" value="New message from Flex website">
+              <input type="hidden" name="from_name" value="Flex Contact Form">
+
               <div class="frow">
                 <div class="fg">
                   <label>Full Name *</label>
-                  <input type="text" placeholder="Juan dela Cruz" required/>
+                  <input type="text" name="name" placeholder="Juan dela Cruz" required/>
                 </div>
                 <div class="fg">
                   <label>Email Address *</label>
-                  <input type="email" placeholder="you@company.com" required/>
+                  <input type="email" name="email" placeholder="you@company.com" required/>
                 </div>
               </div>
               <div class="frow">
                 <div class="fg">
                   <label>Company</label>
-                  <input type="text" placeholder="Your Company"/>
+                  <input type="text" name="company" placeholder="Your Company"/>
                 </div>
                 <div class="fg">
                   <label>Phone Number</label>
-                  <input type="tel" placeholder="+63 9XX XXX XXXX"/>
+                  <input type="tel" name="phone" placeholder="+63 9XX XXX XXXX"/>
                 </div>
               </div>
               <div class="frow">
                 <div class="fg">
                   <label>Service Needed</label>
-                  <select>
+                  <select name="service">
                     <option value="">Select a service…</option>
                     <option>Custom Website Development</option>
                     <option>Web Design & UI/UX</option>
@@ -1083,7 +1232,7 @@
                 </div>
                 <div class="fg">
                   <label>Budget Range</label>
-                  <select>
+                  <select name="budget">
                     <option value="">Select a range…</option>
                     <option>Below ₱20,000</option>
                     <option>₱20,000 – ₱50,000</option>
@@ -1094,9 +1243,9 @@
               </div>
               <div class="fg">
                 <label>Tell us about your project *</label>
-                <textarea rows="4" placeholder="Describe your project, goals, and any specific requirements…" required></textarea>
+                <textarea rows="4" name="message" placeholder="Describe your project, goals, and any specific requirements…" required></textarea>
               </div>
-              <button type="submit" class="btn-submit">
+              <button type="submit" class="btn-submit" id="submitBtn">
                 Send Message <i class="bi bi-send"></i>
               </button>
             </form>
@@ -1213,11 +1362,56 @@ function onScroll(){
 }
 window.addEventListener('scroll', onScroll);
 
-/* ── Mobile Menu ── */
+/* ── Mobile Menu - FIXED VERSION ── */
 const mMenu = document.getElementById('mobileMenu');
-document.getElementById('hamburger').onclick = () => mMenu.classList.add('open');
-document.getElementById('menuClose').onclick = () => mMenu.classList.remove('open');
-function closeMob(){ mMenu.classList.remove('open'); }
+const hamburger = document.getElementById('hamburger');
+const menuClose = document.getElementById('menuClose');
+
+// Open menu
+hamburger.onclick = () => {
+  mMenu.classList.add('open');
+  document.body.style.overflow = 'hidden'; // Prevent background scrolling
+}
+
+// Close menu
+function closeMob() { 
+  mMenu.classList.remove('open');
+  document.body.style.overflow = ''; // Restore scrolling
+}
+
+menuClose.onclick = closeMob;
+
+// Close menu when clicking outside (optional - but menu is full screen)
+mMenu.addEventListener('click', (e) => {
+  if (e.target === mMenu) {
+    closeMob();
+  }
+});
+
+// Close menu on escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && mMenu.classList.contains('open')) {
+    closeMob();
+  }
+});
+
+// Update active state in mobile menu when scrolling
+function updateMobileActive() {
+  const sections = document.querySelectorAll('section[id]');
+  const mobileLinks = document.querySelectorAll('.mobile-menu a:not(.btn-dark)');
+  
+  sections.forEach(sec => {
+    if (scrollY >= sec.offsetTop-150 && scrollY < sec.offsetTop+sec.offsetHeight-150) {
+      mobileLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${sec.id}`) {
+          link.classList.add('active');
+        }
+      });
+    }
+  });
+}
+window.addEventListener('scroll', updateMobileActive);
 
 /* ── Scroll Reveal ── */
 const io = new IntersectionObserver(
@@ -1236,13 +1430,39 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-/* ── Contact Form ── */
-document.getElementById('contactForm').addEventListener('submit', e => {
+/* ── Contact Form with Web3Forms (AJAX + Honeypot) ── */
+document.getElementById('contactForm').addEventListener('submit', async function(e) {
   e.preventDefault();
-  const t = document.getElementById('toast');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 4500);
-  e.target.reset();
+  const form = e.target;
+  const submitBtn = document.getElementById('submitBtn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = 'Sending... <i class="bi bi-hourglass-split"></i>';
+  submitBtn.disabled = true;
+
+  try {
+    const formData = new FormData(form);
+    const response = await fetch(form.action, {
+      method: form.method,
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
+    const result = await response.json();
+
+    if (result.success) {
+      // show toast
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4500);
+      form.reset();
+    } else {
+      alert('Oops! Something went wrong. Please try again or email us directly.');
+    }
+  } catch (error) {
+    alert('Network error. Please check your connection.');
+  } finally {
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
 });
 
 /* ── Smooth Scroll ── */
@@ -1251,15 +1471,18 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const id = a.getAttribute('href');
     if(id.length > 1){
       const el = document.querySelector(id);
-      if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth'}); }
+      if(el){ 
+        e.preventDefault(); 
+        el.scrollIntoView({behavior:'smooth'});
+        // Close mobile menu if open
+        closeMob();
+      }
     }
   });
 });
 
 /* ── Leaflet Map ── */
-// Batngas coordinates
 const BATANGAS = [13.7563, 121.0584];
-
 const map = L.map('map', {
   center: BATANGAS,
   zoom: 15,
@@ -1267,18 +1490,12 @@ const map = L.map('map', {
   scrollWheelZoom: false,
   attributionControl: true,
 });
-
-// Clean tile layer - CartoDB Positron (light, minimal)
 L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
   attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
   subdomains: 'abcd',
   maxZoom: 20,
 }).addTo(map);
-
-// Add zoom control in bottom-right
 L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-// Custom marker icon using DivIcon
 const markerIcon = L.divIcon({
   html: `
     <div style="
@@ -1300,8 +1517,6 @@ const markerIcon = L.divIcon({
   iconAnchor: [22, 44],
   popupAnchor: [0, -48],
 });
-
-// Custom popup content
 const popupContent = `
   <div class="map-popup">
     <div class="map-popup-logo">Flex</div>
@@ -1315,8 +1530,6 @@ const popupContent = `
       Open · Mon–Fri, 9AM–6PM
     </div>
   </div>`;
-
-// Place marker
 L.marker(BATANGAS, { icon: markerIcon })
   .addTo(map)
   .bindPopup(popupContent, {
@@ -1325,8 +1538,6 @@ L.marker(BATANGAS, { icon: markerIcon })
     className: 'flex-popup',
   })
   .openPopup();
-
-// Draw a subtle circle around location
 L.circle(BATANGAS, {
   color: '#1648f5',
   fillColor: '#0ea5e9',
@@ -1335,8 +1546,6 @@ L.circle(BATANGAS, {
   dashArray: '6 4',
   radius: 300,
 }).addTo(map);
-
-// Animate map entry — fly in on scroll into view
 const mapObserver = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if(e.isIntersecting){
@@ -1348,6 +1557,13 @@ const mapObserver = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.3 });
 mapObserver.observe(document.getElementById('map'));
+
+/* Initialize active state on page load */
+window.addEventListener('load', () => {
+  onScroll();
+  updateMobileActive();
+});
 </script>
+<!-- IMPORTANT: Replace YOUR_ACCESS_KEY_HERE with actual Web3Forms access key -->
 </body>
 </html>
