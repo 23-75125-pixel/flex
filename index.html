@@ -332,31 +332,33 @@
 
     /* Project grid */
     .projects-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
+      display:flex;
+      flex-wrap:wrap;
+      justify-content:center;
       gap:1.4rem;
     }
 
-    /* Featured project (spans 2 cols) */
+    /* Project card */
     .proj-card{
       background:var(--c-bg);border:1px solid var(--c-border);
       border-radius:var(--r-xl);overflow:hidden;
       transition:all .35s cubic-bezier(.34,1.26,.64,1);
-      position:relative;group:1;
+      position:relative;
+      width:100%;
+      max-width:780px;
     }
     .proj-card:hover{
       transform:translateY(-6px);
       box-shadow:var(--shadow-lg);
       border-color:rgba(22,72,245,.2);
     }
-    .proj-card.featured{grid-column:span 2;}
 
     /* Thumbnail */
     .proj-thumb{
       position:relative;overflow:hidden;
       aspect-ratio:16/9;background:var(--c-ink);
     }
-    .proj-card.featured .proj-thumb{aspect-ratio:16/8;}
+
     .proj-thumb img{
       width:100%;height:100%;object-fit:cover;
       transition:transform .5s ease,filter .4s ease;
@@ -404,8 +406,7 @@
     .proj-visit-btn:hover{background:var(--c-blue);color:#fff;}
 
     /* Card body */
-    .proj-body{padding:1.4rem 1.6rem 1.6rem;}
-    .proj-card.featured .proj-body{padding:1.6rem 2rem 2rem;}
+    .proj-body{padding:1.6rem 2rem 2rem;}
 
     /* Tags */
     .proj-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.85rem;}
@@ -421,9 +422,9 @@
     .tag-coming{background:rgba(148,163,184,.12);color:var(--c-ink3);}
 
     .proj-title{
-      font-size:1.15rem;font-weight:900;margin-bottom:.4rem;letter-spacing:-.02em;
+      font-size:1.4rem;font-weight:900;margin-bottom:.4rem;letter-spacing:-.02em;
     }
-    .proj-card.featured .proj-title{font-size:1.4rem;}
+
     .proj-desc{font-size:.83rem;color:var(--c-ink2);line-height:1.68;margin-bottom:1.1rem;}
 
     /* Meta row */
@@ -462,10 +463,11 @@
 
     /* Stats strip */
     .proj-stats-strip{
-      display:grid;grid-template-columns:repeat(3,1fr);
+      display:grid;grid-template-columns:repeat(2,1fr);
       gap:1px;background:var(--c-border);
       border:1px solid var(--c-border);border-radius:var(--r-lg);
-      overflow:hidden;margin-top:3rem;
+      overflow:hidden;margin:2.5rem auto 0;
+      max-width:780px;
     }
     .pss-cell{
       background:#fff;padding:1.4rem;text-align:center;
@@ -552,8 +554,8 @@
       .contact-right{padding:2rem;}
       #cursor-dot,#cursor-ring{display:none;}
       body{cursor:auto;}
-      .projects-grid{grid-template-columns:1fr 1fr;}
-      .proj-card.featured{grid-column:span 2;}
+
+
       .proj-stats-strip{grid-template-columns:repeat(3,1fr);}
     }
     @media(max-width:767px){
@@ -564,8 +566,8 @@
       #map{height:320px;}
       .mobile-menu a{font-size:1.4rem;padding:0.4rem 1.5rem;}
       .menu-close{top:1rem;right:1rem;width:40px;height:40px;font-size:1.2rem;}
-      .projects-grid{grid-template-columns:1fr;}
-      .proj-card.featured{grid-column:span 1;}
+
+
       .proj-stats-strip{grid-template-columns:1fr 1fr;}
       .proj-stats-strip .pss-cell:last-child{grid-column:span 2;}
     }
@@ -811,13 +813,20 @@
         <h2 class="s-title">Real projects, <em class="gradient-text">real impact.</em></h2>
         <p class="s-desc">From trail guides to business platforms — here's what we've built. Every project is crafted with purpose, designed to perform, and built to last.</p>
       </div>
-      
+      <div class="col-lg-6 d-flex justify-content-lg-end align-items-end reveal d2">
+        <div class="proj-filters">
+          <button class="proj-filter-btn active" data-filter="all">All Projects</button>
+          <button class="proj-filter-btn" data-filter="web">Web Apps</button>
+          <button class="proj-filter-btn" data-filter="design">Design</button>
+          <button class="proj-filter-btn" data-filter="tourism">Tourism</button>
+        </div>
+      </div>
     </div>
 
     <div class="projects-grid" id="projectsGrid">
 
       <!-- ── FEATURED: Mt. Masapinit ── -->
-      <div class="proj-card featured reveal d1" data-category="web tourism design">
+      <div class="proj-card reveal d1" data-category="web tourism design">
         <div class="proj-thumb">
           <!-- Browser chrome overlay -->
           <div class="proj-chrome">
@@ -842,16 +851,17 @@
         </div>
         <div class="proj-body">
           <div class="proj-tags">
-          
+            <span class="proj-tag tag-live">● Live</span>
+            <span class="proj-tag tag-web">Web App</span>
             <span class="proj-tag tag-hiking">Hiking</span>
             <span class="proj-tag tag-tourism">Tourism</span>
-  
+            <span class="proj-tag tag-design">UI/UX</span>
           </div>
           <h4 class="proj-title">Mt. Masapinit Trail Guide</h4>
           <p class="proj-desc">A complete digital trail guide for Mt. Masapinit in Toong, Tuy, Batangas — featuring an interactive map, photo gallery, safety tips, hiker community joining, and summit stats. Built for hikers who want peaceful trails and clean nature.</p>
           <div class="proj-meta">
             <div class="proj-meta-left">
-              <span class="proj-year">2026</span>
+              <span class="proj-year">2025</span>
               <span class="proj-sep"></span>
               <span class="proj-type">Tourism · Community</span>
             </div>
@@ -862,18 +872,48 @@
         </div>
       </div>
 
-     
-     
+      <!-- ── Coming Soon Card 1 ── -->
+      <div class="proj-coming reveal d2" data-category="web">
+        <div class="proj-coming-ico">🛒</div>
+        <h5>E-Commerce Platform</h5>
+        <p>A full-featured online store with payment gateway, inventory management, and analytics dashboard. Currently in development.</p>
+        <div style="margin-top:1rem;">
+          <span class="proj-tag tag-coming">Coming Soon</span>
+        </div>
+      </div>
+
+      <!-- ── Coming Soon Card 2 ── -->
+      <div class="proj-coming reveal d1" data-category="web design">
+        <div class="proj-coming-ico">📊</div>
+        <h5>Business Dashboard</h5>
+        <p>A real-time analytics and operations dashboard for a local business, integrating multiple data sources into one clean interface.</p>
+        <div style="margin-top:1rem;">
+          <span class="proj-tag tag-coming">In Progress</span>
+        </div>
+      </div>
+
+      <!-- ── Coming Soon Card 3 ── -->
+      <div class="proj-coming reveal d2" data-category="design">
+        <div class="proj-coming-ico">🎨</div>
+        <h5>Brand Identity & Web Design</h5>
+        <p>Complete brand identity and website redesign for a local startup — from logo and color palette to full web presence.</p>
+        <div style="margin-top:1rem;">
+          <span class="proj-tag tag-coming">Coming Soon</span>
+        </div>
+      </div>
 
     </div>
 
     <!-- Stats strip -->
     <div class="proj-stats-strip reveal d2 mt-4">
       <div class="pss-cell">
-        <div class="pss-val">1</div>
+        <div class="pss-val">1+</div>
         <div class="pss-lbl">Live Projects</div>
       </div>
-      
+      <div class="pss-cell">
+        <div class="pss-val">3+</div>
+        <div class="pss-lbl">In Development</div>
+      </div>
       <div class="pss-cell">
         <div class="pss-val">100%</div>
         <div class="pss-lbl">Custom Built</div>
@@ -965,7 +1005,7 @@
           <div class="contact-left h-100">
             <h3>Contact Information</h3>
             <p>Fill out the form and our team will be in touch shortly. We'd love to hear about your project!</p>
-            <div class="ci"><div class="ci-ico">📧</div><div><div class="ci-lbl">Email</div><div class="ci-val">flexsoftware26@gmail.com</div></div></div>
+            <div class="ci"><div class="ci-ico">📧</div><div><div class="ci-lbl">Email</div><div class="ci-val"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="abcdc7ced3d8c4cddfdccad9ce999debccc6cac2c785c8c4c6">[email&#160;protected]</a></div></div></div>
             <div class="ci"><div class="ci-ico">📞</div><div><div class="ci-lbl">Phone</div><div class="ci-val">+639050868984</div></div></div>
             <div class="ci"><div class="ci-ico">📍</div><div><div class="ci-lbl">Location</div><div class="ci-val">Nasugbu Batangas, Philippines</div></div></div>
             <div class="ci"><div class="ci-ico">🕐</div><div><div class="ci-lbl">Office Hours</div><div class="ci-val">Mon–Fri PHT</div></div></div>
@@ -1095,7 +1135,7 @@
 </div>
 
 <!-- ══════════════════ SCRIPTS ══════════════════ -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 /* ── Custom Cursor ── */
