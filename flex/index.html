@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Flex | Innovate • Connect • Grow</title>
+  <meta name="description" content="Flex is an IT company in Nasugbu, Batangas building custom websites, digital solutions, and IT support for growing businesses."/>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet"/>
+  <link rel="icon" type="image/png" href="flex.png"/>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    /* ════════════════════════════════════════════
+       DESIGN TOKENS — one palette, one typeface,
+       one radius scale, one shadow scale.
+       ════════════════════════════════════════════ */
+    :root{
+      --bg:        #ffffff;
+      --bg-alt:    #f6f7f9;
+      --border:    #e6e8ee;
+      --ink:       #0f1222;
+      --ink-2:     #4b5265;
+      --ink-3:     #8a90a3;
+      --accent:    #1648f5;
+      --accent-2:  #5b8bff;   /* lighter blue for dark sections */
+      --accent-soft: rgba(22,72,245,.07);
+      --green:     #059669;
+      --radius:    16px;
+      --radius-sm: 10px;
+      --shadow-sm: 0 1px 2px rgba(15,18,34,.05);
+      --shadow-md: 0 8px 28px rgba(15,18,34,.08);
+      --shadow-lg: 0 18px 50px rgba(15,18,34,.12);
+      --nav-h:     72px;
+    }
+
+    /* ════ Base ════ */
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{scroll-behavior:smooth;}
+    body{
+      font-family:'Plus Jakarta Sans',system-ui,sans-serif;
+      background:var(--bg);
+      color:var(--ink);
+      line-height:1.6;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+    }
+    img{max-width:100%;display:block;}
+    ::selection{background:var(--accent);color:#fff;}
+    ::-webkit-scrollbar{width:8px;}
+    ::-webkit-scrollbar-track{background:var(--bg-alt);}
+    ::-webkit-scrollbar-thumb{background:#c9cfdd;border-radius:8px;}
+    ::-webkit-scrollbar-thumb:hover{background:var(--accent);}
+    :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+
+    .container{max-width:1160px;}
+    section{padding:clamp(4rem,8vw,6.5rem) 0;}
+    section[id]{scroll-margin-top:90px;}
+    h1,h2,h3,h4,h5,h6{font-weight:800;letter-spacing:-.02em;line-height:1.15;}
+
+    /* ════ Type helpers ════ */
+    .eyebrow{
+      display:flex;align-items:center;gap:.55rem;
+      font-size:.72rem;font-weight:700;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--accent);margin-bottom:1rem;
+    }
+    .eyebrow::before{
+      content:'';width:20px;height:2px;
+      background:var(--accent);border-radius:2px;flex-shrink:0;
+    }
+    .s-title{font-size:clamp(1.75rem,3.2vw,2.6rem);margin-bottom:1rem;}
+    .s-desc{font-size:.95rem;color:var(--ink-2);line-height:1.75;max-width:560px;}
+    .accent{color:var(--accent);}
+
+    /* ════ Buttons — 4 consistent variants ════ */
+    .btn-solid,.btn-line,.btn-white,.btn-oline{
+      display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+      padding:.75rem 1.5rem;border-radius:999px;
+      font-family:inherit;font-size:.9rem;font-weight:700;line-height:1.25;
+      text-decoration:none;border:1.5px solid transparent;cursor:pointer;
+      transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease,box-shadow .2s ease;
+    }
+    .btn-solid i,.btn-line i,.btn-white i,.btn-oline i{transition:transform .2s ease;}
+    [class*="btn-"]:hover i.bi-arrow-right{transform:translateX(3px);}
+    .btn-solid{background:var(--ink);color:#fff;}
+    .btn-solid:hover{background:var(--accent);border-color:transparent;color:#fff;transform:translateY(-1px);box-shadow:0 8px 20px rgba(22,72,245,.25);}
+    .btn-line{background:transparent;color:var(--ink);border-color:var(--border);}
+    .btn-line:hover{border-color:var(--ink);color:var(--ink);transform:translateY(-1px);}
+    .btn-white{background:#fff;color:var(--ink);}
+    .btn-white:hover{background:var(--accent);border-color:transparent;color:#fff;transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.25);}
+    .btn-oline{background:transparent;color:#fff;border-color:rgba(255,255,255,.25);}
+    .btn-oline:hover{border-color:#fff;color:#fff;}
+    .btn-submit{width:100%;}
+
+    /* ════ Shared card + icon-chip components ════ */
+    .card-min{
+      background:var(--bg-alt);border:1px solid var(--border);
+      border-radius:var(--radius);padding:1.6rem;height:100%;
+      transition:transform .25s ease,box-shadow .25s ease,background .25s ease,border-color .25s ease;
+    }
+    .card-min:hover{
+      transform:translateY(-4px);background:#fff;
+      box-shadow:var(--shadow-md);border-color:rgba(22,72,245,.22);
+    }
+    .ico-chip{
+      width:42px;height:42px;border-radius:12px;
+      background:var(--accent-soft);color:var(--accent);
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:1.1rem;margin-bottom:1rem;
+    }
+    .ico-chip-dark{
+      width:38px;height:38px;min-width:38px;border-radius:11px;
+      background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);
+      color:#fff;display:inline-flex;align-items:center;justify-content:center;
+      font-size:.95rem;
+    }
+
+    /* ════ Scroll progress ════ */
+    #progress{
+      position:fixed;top:0;left:0;height:3px;width:0;
+      background:var(--accent);z-index:1300;
+    }
+
+    /* ════ Navbar ════ */
+    #navbar{
+      position:fixed;top:0;left:0;right:0;z-index:1000;
+      padding:.9rem 0;
+      transition:padding .3s ease,background .3s ease,box-shadow .3s ease;
+    }
+    #navbar.scrolled{
+      background:rgba(255,255,255,.92);
+      -webkit-backdrop-filter:blur(12px);
+      backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border);
+      padding:.55rem 0;box-shadow:var(--shadow-sm);
+    }
+    .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;}
+    .nav-logo{display:flex;align-items:center;text-decoration:none;}
+    .nav-logo img{height:44px;width:auto;transition:height .3s ease;}
+    #navbar.scrolled .nav-logo img{height:38px;}
+    .nav-links{display:flex;align-items:center;gap:.15rem;list-style:none;margin:0;padding:0;}
+    .nav-links a{
+      font-size:.86rem;font-weight:600;color:var(--ink-2);
+      text-decoration:none;padding:.45rem .85rem;border-radius:999px;
+      transition:color .2s ease,background .2s ease;
+    }
+    .nav-links a:hover{color:var(--ink);}
+    .nav-links a.active{color:var(--accent);background:var(--accent-soft);}
+    .nav-cta{
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:var(--ink);color:#fff;text-decoration:none;
+      padding:.55rem 1.2rem;border-radius:999px;
+      font-size:.84rem;font-weight:700;
+      transition:background .2s ease,transform .2s ease,box-shadow .2s ease;
+    }
+    .nav-cta:hover{background:var(--accent);color:#fff;transform:translateY(-1px);box-shadow:0 6px 16px rgba(22,72,245,.25);}
+    .hamburger{
+      display:none;width:44px;height:44px;
+      border-radius:12px;border:1px solid var(--border);
+      background:#fff;color:var(--ink);font-size:1.25rem;
+      align-items:center;justify-content:center;cursor:pointer;
+      transition:border-color .2s ease;
+    }
+    .hamburger:hover{border-color:var(--ink);}
+
+    /* ════ Mobile menu (clean white overlay) ════ */
+    .mobile-menu{
+      position:fixed;inset:0;background:#fff;z-index:1200;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:.35rem;overflow-y:auto;
+      transform:translateY(-102%);visibility:hidden;
+      transition:transform .4s cubic-bezier(.4,0,.2,1),visibility .4s;
+    }
+    .mobile-menu.open{transform:none;visibility:visible;}
+    .mobile-menu a:not(.btn-solid){
+      font-size:1.45rem;font-weight:700;color:var(--ink-2);
+      text-decoration:none;padding:.45rem 1.4rem;border-radius:999px;
+      opacity:0;transform:translateY(12px);
+      transition:opacity .3s ease,transform .3s ease,color .2s ease,background .2s ease;
+    }
+    .mobile-menu.open a:not(.btn-solid){opacity:1;transform:none;}
+    .mobile-menu a:not(.btn-solid):hover,
+    .mobile-menu a:not(.btn-solid).active{color:var(--accent);background:var(--accent-soft);}
+    .mobile-menu a:not(.btn-solid):nth-child(2){transition-delay:.04s;}
+    .mobile-menu a:not(.btn-solid):nth-child(3){transition-delay:.08s;}
+    .mobile-menu a:not(.btn-solid):nth-child(4){transition-delay:.12s;}
+    .mobile-menu a:not(.btn-solid):nth-child(5){transition-delay:.16s;}
+    .mobile-menu a:not(.btn-solid):nth-child(6){transition-delay:.20s;}
+    .mobile-menu a:not(.btn-solid):nth-child(7){transition-delay:.24s;}
+    .mobile-menu a:not(.btn-solid):nth-child(8){transition-delay:.28s;}
+    .mobile-menu .btn-solid{
+      margin-top:1.2rem;opacity:0;transform:translateY(12px);
+      transition:opacity .3s ease .32s,transform .3s ease .32s,background .2s ease;
+    }
+    .mobile-menu.open .btn-solid{opacity:1;transform:none;}
+    .menu-close{
+      position:absolute;top:1.2rem;right:1.2rem;
+      width:44px;height:44px;border-radius:50%;
+      background:#fff;border:1px solid var(--border);color:var(--ink);
+      font-size:1.1rem;display:flex;align-items:center;justify-content:center;
+      cursor:pointer;transition:transform .25s ease,border-color .2s ease;
+    }
+    .menu-close:hover{border-color:var(--ink);transform:rotate(90deg);}
+
+    /* ════ Hero ════ */
+    #hero{
+      min-height:100vh;display:flex;align-items:center;
+      padding:calc(var(--nav-h) + 4rem) 0 4rem;
+      background:#fff;position:relative;overflow:hidden;
+    }
+    .hero-dots{
+      position:absolute;inset:0;pointer-events:none;
+      background-image:radial-gradient(rgba(22,72,245,.09) 1px,transparent 1px);
+      background-size:26px 26px;
+      -webkit-mask-image:radial-gradient(ellipse 60% 60% at 75% 30%,black,transparent 70%);
+      mask-image:radial-gradient(ellipse 60% 60% at 75% 30%,black,transparent 70%);
+    }
+    .hero-badge{
+      display:inline-flex;align-items:center;gap:.55rem;
+      background:#fff;border:1px solid var(--border);border-radius:999px;
+      padding:.4rem 1rem;box-shadow:var(--shadow-sm);
+      font-size:.73rem;font-weight:700;letter-spacing:.08em;
+      text-transform:uppercase;color:var(--ink-2);margin-bottom:1.5rem;
+    }
+    .hero-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s ease-in-out infinite;}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+    .hero-h1{font-size:clamp(2.6rem,6vw,4.6rem);line-height:1.05;letter-spacing:-.03em;margin-bottom:1.4rem;}
+    .hero-sub{font-size:1.05rem;color:var(--ink-2);line-height:1.75;max-width:480px;margin-bottom:2rem;}
+    .hero-stats{display:flex;flex-wrap:wrap;margin-top:2.6rem;}
+    .hstat{padding-right:1.5rem;margin-right:1.5rem;border-right:1px solid var(--border);}
+    .hstat:last-child{border-right:0;margin-right:0;padding-right:0;}
+    .hstat b{display:block;font-size:1.5rem;font-weight:800;line-height:1.1;}
+    .hstat span{font-size:.75rem;color:var(--ink-3);}
+
+    /* Browser mockup */
+    .hero-visual{position:relative;}
+    .mockup{
+      background:#fff;border:1px solid var(--border);
+      border-radius:var(--radius);box-shadow:var(--shadow-lg);overflow:hidden;
+    }
+    .mbar{
+      display:flex;align-items:center;gap:.45rem;
+      padding:.65rem .9rem;background:var(--bg-alt);border-bottom:1px solid var(--border);
+    }
+    .m-d{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+    .m-r{background:#ff5f57;}.m-y{background:#febc2e;}.m-g{background:#28c840;}
+    .m-url{
+      flex:1;background:#fff;border:1px solid var(--border);border-radius:6px;
+      padding:.2rem .7rem;font-size:.7rem;color:var(--ink-3);margin-left:.4rem;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .mshot{width:100%;aspect-ratio:16/10;object-fit:cover;}
+    .mrow{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border);}
+    .mcell{
+      display:flex;flex-direction:column;align-items:center;gap:.3rem;
+      padding:.85rem .5rem;border-right:1px solid var(--border);
+      font-size:.72rem;font-weight:600;color:var(--ink-2);text-align:center;
+    }
+    .mcell:last-child{border-right:0;}
+    .mcell i{color:var(--accent);font-size:1rem;}
+
+    /* ════ Marquee ════ */
+    .marquee-wrap{
+      background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+      padding:1.1rem 0;overflow:hidden;
+    }
+    .marquee-label{
+      font-size:.68rem;font-weight:700;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--ink-3);text-align:center;margin-bottom:.8rem;
+    }
+    .mq-track{display:flex;gap:2.5rem;width:max-content;animation:mq 24s linear infinite;}
+    .mq-track:hover{animation-play-state:paused;}
+    @keyframes mq{to{transform:translateX(-50%)}}
+    .mq-item{
+      display:flex;align-items:center;gap:.5rem;
+      font-size:.88rem;font-weight:600;color:var(--ink-3);
+      white-space:nowrap;transition:color .2s ease;
+    }
+    .mq-item:hover{color:var(--accent);}
+
+    /* ════ About ════ */
+    .about-card h5{font-size:1rem;margin-bottom:.35rem;}
+    .about-card p{font-size:.85rem;color:var(--ink-2);line-height:1.65;}
+
+    /* ════ Services tabs ════ */
+    #services{background:var(--bg-alt);}
+    .tabs{
+      display:flex;gap:.25rem;flex-wrap:wrap;
+      border-bottom:1px solid var(--border);margin-bottom:2.2rem;
+    }
+    .tab-btn{
+      font-family:inherit;font-size:.88rem;font-weight:700;color:var(--ink-3);
+      background:none;border:none;border-bottom:2px solid transparent;
+      padding:.8rem 1rem;margin-bottom:-1px;cursor:pointer;
+      display:inline-flex;align-items:center;gap:.5rem;
+      transition:color .2s ease,border-color .2s ease;
+    }
+    .tab-btn i{font-size:1rem;}
+    .tab-btn:hover{color:var(--ink);}
+    .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+    .tab-panel{display:none;}
+    .tab-panel.active{
+      display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;
+      align-items:center;animation:fadeUp .35s ease;
+    }
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .tab-visual{
+      border-radius:var(--radius);overflow:hidden;
+      border:1px solid var(--border);background:#fff;
+      aspect-ratio:4/3;box-shadow:var(--shadow-sm);
+    }
+    .tab-visual img{width:100%;height:100%;object-fit:cover;}
+    .tab-info h3{font-size:1.5rem;margin-bottom:.7rem;}
+    .tab-info>p{font-size:.92rem;color:var(--ink-2);line-height:1.75;margin-bottom:1.2rem;}
+    .feat-list{list-style:none;display:grid;gap:.6rem;}
+    .feat-list li{display:flex;align-items:flex-start;gap:.65rem;font-size:.88rem;color:var(--ink-2);line-height:1.5;}
+    .feat-list li::before{
+      content:'✓';flex-shrink:0;width:20px;height:20px;margin-top:.1rem;
+      border-radius:50%;background:var(--accent-soft);color:var(--accent);
+      font-size:.68rem;font-weight:800;
+      display:inline-flex;align-items:center;justify-content:center;
+    }
+
+    /* ════ Projects ════ */
+    .projects-grid{display:flex;flex-direction:column;align-items:center;gap:1.5rem;}
+    .proj-card{
+      width:100%;max-width:820px;
+      background:var(--bg-alt);border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;
+      transition:transform .3s ease,box-shadow .3s ease,background .3s ease,border-color .3s ease;
+    }
+    .proj-card:hover{
+      transform:translateY(-5px);background:#fff;
+      box-shadow:var(--shadow-lg);border-color:rgba(22,72,245,.22);
+    }
+    .proj-thumb{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--ink);}
+    .proj-thumb img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;}
+    .proj-card:hover .proj-thumb img{transform:scale(1.03);}
+    .proj-chrome{
+      position:absolute;top:0;left:0;right:0;z-index:2;
+      display:flex;align-items:center;gap:.45rem;padding:.5rem .8rem;
+      background:rgba(15,18,34,.55);
+      -webkit-backdrop-filter:blur(6px);
+      backdrop-filter:blur(6px);
+    }
+    .pc-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .pc-r{background:#ff5f57;}.pc-y{background:#febc2e;}.pc-g{background:#28c840;}
+    .pc-url{
+      flex:1;background:rgba(255,255,255,.12);color:rgba(255,255,255,.75);
+      border-radius:6px;padding:.15rem .6rem;font-size:.68rem;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 .3rem;
+    }
+    .proj-overlay{
+      position:absolute;inset:0;z-index:1;
+      display:flex;align-items:flex-end;justify-content:center;padding:1.2rem;
+      background:linear-gradient(to bottom,transparent 40%,rgba(15,18,34,.55));
+      opacity:0;transition:opacity .25s ease;
+    }
+    .proj-card:hover .proj-overlay{opacity:1;}
+    .proj-visit-btn{
+      display:inline-flex;align-items:center;gap:.45rem;
+      background:#fff;color:var(--ink);text-decoration:none;
+      padding:.55rem 1.3rem;border-radius:999px;
+      font-size:.82rem;font-weight:700;
+      transform:translateY(10px);
+      transition:transform .3s ease,background .2s ease,color .2s ease;
+    }
+    .proj-card:hover .proj-visit-btn{transform:none;}
+    .proj-visit-btn:hover{background:var(--accent);color:#fff;}
+    .proj-body{padding:1.5rem 1.8rem 1.7rem;}
+    .proj-tags{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:.8rem;}
+    .proj-tag{
+      font-size:.66rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      padding:.24rem .7rem;border-radius:999px;
+      background:#fff;border:1px solid var(--border);color:var(--ink-2);
+    }
+    .tag-live{background:#ecfdf5;border-color:#b7ebd5;color:var(--green);}
+    .proj-title{font-size:1.3rem;margin-bottom:.4rem;}
+    .proj-desc{font-size:.85rem;color:var(--ink-2);line-height:1.7;margin-bottom:1.1rem;}
+    .proj-meta{
+      display:flex;align-items:center;justify-content:space-between;
+      gap:1rem;flex-wrap:wrap;padding-top:1rem;border-top:1px solid var(--border);
+    }
+    .proj-meta-left{display:flex;align-items:center;gap:.55rem;font-size:.75rem;font-weight:600;color:var(--ink-3);}
+    .proj-sep{width:3px;height:3px;border-radius:50%;background:#c9cfdd;}
+    .proj-link{
+      display:inline-flex;align-items:center;gap:.35rem;
+      font-size:.8rem;font-weight:700;color:var(--accent);text-decoration:none;
+    }
+    .proj-link i{transition:transform .2s ease;}
+    .proj-link:hover{color:var(--accent);}
+    .proj-link:hover i{transform:translate(2px,-2px);}
+
+    /* ════ Why us ════ */
+    .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;}
+    .wc-num{font-size:1.35rem;font-weight:800;color:var(--accent);margin-bottom:.7rem;line-height:1;}
+    .why-card h4{font-size:1rem;margin-bottom:.35rem;}
+    .why-card p{font-size:.85rem;color:var(--ink-2);line-height:1.65;}
+    .why-cta{
+      grid-column:1/-1;background:var(--ink);color:#fff;
+      border-radius:var(--radius);padding:1.8rem 2rem;
+      display:flex;align-items:center;justify-content:space-between;
+      gap:1.5rem;flex-wrap:wrap;
+    }
+    .why-cta h4{color:#fff;font-size:1.15rem;}
+    .why-cta p{color:rgba(255,255,255,.55);font-size:.85rem;margin-top:.2rem;}
+
+    /* ════ Process ════ */
+    #process{background:var(--bg-alt);}
+    .proc-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem;position:relative;}
+    .proc-steps::before{
+      content:'';position:absolute;top:28px;left:12%;right:12%;
+      height:1px;background:var(--border);
+    }
+    .proc-step{text-align:center;position:relative;}
+    .proc-num{
+      width:56px;height:56px;border-radius:50%;
+      background:#fff;border:1.5px solid var(--border);color:var(--accent);
+      font-weight:800;font-size:1rem;
+      display:flex;align-items:center;justify-content:center;
+      margin:0 auto 1rem;box-shadow:0 0 0 6px var(--bg-alt);
+      transition:background .25s ease,color .25s ease,border-color .25s ease,box-shadow .25s ease;
+    }
+    .proc-step:hover .proc-num{
+      background:var(--accent);border-color:var(--accent);color:#fff;
+      box-shadow:0 0 0 6px var(--bg-alt),0 8px 20px rgba(22,72,245,.25);
+    }
+    .proc-step h5{font-size:.95rem;margin-bottom:.35rem;}
+    .proc-step p{font-size:.82rem;color:var(--ink-2);line-height:1.6;}
+
+    /* ════ Partnership (dark) ════ */
+    #partnership{background:var(--ink);color:#fff;}
+    #partnership .eyebrow{color:var(--accent-2);}
+    #partnership .eyebrow::before{background:var(--accent-2);}
+    #partnership .s-title{color:#fff;}
+    #partnership .s-desc{color:rgba(255,255,255,.55);}
+    #partnership .accent{color:var(--accent-2);}
+    .part-badge{
+      display:inline-flex;align-items:center;gap:.5rem;
+      border:1px solid rgba(255,255,255,.16);border-radius:999px;
+      padding:.5rem 1.1rem;font-size:.85rem;font-weight:600;
+      color:rgba(255,255,255,.85);
+      transition:border-color .2s ease,color .2s ease;
+    }
+    .part-badge i{color:var(--accent-2);}
+    .part-badge:hover{border-color:rgba(255,255,255,.4);color:#fff;}
+
+    /* ════ Contact ════ */
+    #contact{background:var(--bg-alt);}
+    .contact-card{
+      background:#fff;border:1px solid var(--border);
+      border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-md);
+    }
+    .contact-left{background:var(--ink);color:#fff;padding:clamp(1.8rem,4vw,2.6rem);height:100%;}
+    .contact-left h3{font-size:1.4rem;margin-bottom:.6rem;}
+    .contact-left>p{font-size:.88rem;color:rgba(255,255,255,.55);line-height:1.7;margin-bottom:1.6rem;}
+    .ci{display:flex;align-items:flex-start;gap:.85rem;margin-bottom:1rem;}
+    .ci-lbl{font-size:.66rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.4);}
+    .ci-val{font-size:.88rem;font-weight:600;color:#fff;}
+    .ci-val a{color:#fff;text-decoration:none;transition:color .2s ease;}
+    .ci-val a:hover{color:var(--accent-2);}
+    .c-social{display:flex;gap:.5rem;margin-top:1.6rem;}
+    .csoc{
+      width:36px;height:36px;border-radius:10px;
+      display:inline-flex;align-items:center;justify-content:center;
+      font-size:.95rem;text-decoration:none;
+      transition:all .2s ease;
+    }
+    .csoc-dark{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);color:#fff;}
+    .csoc-dark:hover{background:var(--accent);border-color:var(--accent);color:#fff;transform:translateY(-2px);}
+    .csoc-light{background:var(--bg-alt);border:1px solid var(--border);color:var(--ink-2);}
+    .csoc-light:hover{color:var(--accent);border-color:rgba(22,72,245,.3);transform:translateY(-2px);}
+    .contact-right{padding:clamp(1.8rem,4vw,2.6rem);}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .fg{margin-bottom:1rem;}
+    .fg label{display:block;font-size:.76rem;font-weight:700;color:var(--ink-2);margin-bottom:.35rem;}
+    .fg input,.fg select,.fg textarea{
+      width:100%;background:var(--bg-alt);
+      border:1.5px solid var(--border);border-radius:var(--radius-sm);
+      padding:.75rem .95rem;font-family:inherit;font-size:.88rem;color:var(--ink);
+      outline:none;transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+    }
+    .fg input:focus,.fg select:focus,.fg textarea:focus{
+      border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accent-soft);
+    }
+    .fg textarea{resize:none;}
+
+    /* ════ Map ════ */
+    #map-section{background:var(--bg-alt);}
+    .map-container{
+      border-radius:var(--radius);overflow:hidden;
+      border:1px solid var(--border);box-shadow:var(--shadow-sm);background:#fff;
+    }
+    #map{height:440px;}
+    .leaflet-popup-content-wrapper{
+      border-radius:var(--radius-sm) !important;
+      box-shadow:var(--shadow-md) !important;
+    }
+    .leaflet-popup-content{margin:.8rem 1rem !important;}
+    .map-popup{font-family:'Plus Jakarta Sans',sans-serif;}
+    .map-popup-logo{font-size:1.05rem;font-weight:800;color:var(--ink);}
+    .map-popup-tag{font-size:.7rem;color:var(--ink-3);margin-bottom:.55rem;}
+    .map-popup-addr{display:flex;align-items:flex-start;gap:.5rem;font-size:.8rem;color:var(--ink-2);line-height:1.5;}
+    .map-popup-addr i{color:var(--accent);margin-top:.15rem;}
+    .map-badge{
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:var(--accent-soft);border-radius:999px;
+      padding:.25rem .7rem;font-size:.7rem;font-weight:700;
+      color:var(--accent);margin-top:.7rem;
+    }
+    .map-badge-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:blink 1.6s ease-in-out infinite;}
+
+    /* ════ Footer ════ */
+    footer{background:#fff;border-top:1px solid var(--border);padding:3.5rem 0 2rem;}
+    .foot-logo{font-size:1.4rem;font-weight:800;}
+    .foot-tag{font-size:.78rem;color:var(--ink-3);letter-spacing:.04em;}
+    .foot-desc{font-size:.84rem;color:var(--ink-2);line-height:1.7;max-width:260px;margin:1rem 0 1.2rem;}
+    .foot-h{font-size:.7rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-3);margin-bottom:.9rem;}
+    .foot-a{
+      display:block;font-size:.86rem;color:var(--ink-2);
+      text-decoration:none;margin-bottom:.5rem;transition:color .2s ease;
+    }
+    .foot-a:hover{color:var(--accent);}
+    .foot-a i{font-size:.7rem;}
+    .foot-bottom{
+      border-top:1px solid var(--border);margin-top:2.5rem;padding-top:1.4rem;
+      display:flex;justify-content:space-between;align-items:center;
+      flex-wrap:wrap;gap:.5rem;
+    }
+    .foot-bottom p{font-size:.8rem;color:var(--ink-3);}
+
+    /* ════ Toast + back-to-top ════ */
+    #toast{
+      position:fixed;bottom:5.8rem;right:1.5rem;z-index:1100;
+      background:#fff;border:1px solid var(--border);border-radius:var(--radius-sm);
+      padding:.9rem 1.2rem;display:flex;align-items:center;gap:.7rem;
+      box-shadow:var(--shadow-lg);
+      transform:translateX(120%);
+      transition:transform .35s cubic-bezier(.34,1.4,.64,1);
+    }
+    #toast.show{transform:none;}
+    #toast .t-msg{font-size:.88rem;font-weight:700;color:var(--ink);}
+    #toast .t-sub{font-size:.75rem;color:var(--ink-3);}
+    #toTop{
+      position:fixed;bottom:1.5rem;right:1.5rem;z-index:1050;
+      width:44px;height:44px;border-radius:50%;
+      background:var(--ink);color:#fff;border:none;cursor:pointer;
+      display:flex;align-items:center;justify-content:center;font-size:1rem;
+      opacity:0;visibility:hidden;transform:translateY(8px);
+      transition:opacity .3s ease,visibility .3s ease,transform .3s ease,background .2s ease;
+    }
+    #toTop.show{opacity:1;visibility:visible;transform:none;}
+    #toTop:hover{background:var(--accent);}
+
+    /* ════ Scroll reveal ════ */
+    .reveal{opacity:0;transform:translateY(20px);transition:opacity .6s ease,transform .6s ease;}
+    .reveal.up{opacity:1;transform:none;}
+    .d1{transition-delay:.06s;}.d2{transition-delay:.12s;}
+    .d3{transition-delay:.18s;}.d4{transition-delay:.24s;}
+
+    /* ════ Honeypot ════ */
+    .honeypot-field{
+      display:none !important;visibility:hidden !important;opacity:0 !important;
+      position:absolute !important;top:-9999px !important;left:-9999px !important;
+      height:0 !important;width:0 !important;overflow:hidden !important;
+      pointer-events:none !important;
+    }
+
+    /* ════ Small utilities ════ */
+    .mq-clip{overflow:hidden;}
+    .pc-lock{color:rgba(255,255,255,.5);font-size:.8rem;}
+    .title-center{max-width:580px;margin-left:auto;margin-right:auto;}
+    .t-ico{color:var(--green);font-size:1.25rem;}
+    .heart{color:var(--accent);font-size:.7rem;}
+
+    /* ════ Responsive ════ */
+    @media(max-width:991px){
+      .nav-links,.nav-cta{display:none;}
+      .hamburger{display:inline-flex;}
+      .tab-panel.active{grid-template-columns:1fr;gap:1.8rem;}
+      .tab-visual{aspect-ratio:16/9;}
+      .why-grid{grid-template-columns:1fr 1fr;}
+      .proc-steps{grid-template-columns:1fr 1fr;gap:1.6rem;}
+      .proc-steps::before{display:none;}
+    }
+    @media(max-width:767px){
+      .why-grid{grid-template-columns:1fr;}
+      .why-cta{flex-direction:column;align-items:flex-start;}
+      .frow{grid-template-columns:1fr;}
+      #map{height:320px;}
+      .proj-body{padding:1.2rem 1.2rem 1.4rem;}
+      #toast{right:1rem;left:1rem;bottom:5.5rem;}
+    }
+    @media(max-width:575px){
+      .proc-steps{grid-template-columns:1fr;}
+      .hero-stats{flex-direction:column;gap:1rem;}
+      .hstat{border-right:0;padding-right:0;margin-right:0;}
+      .tab-btn{padding:.7rem .7rem;font-size:.82rem;}
+      .mobile-menu a:not(.btn-solid){font-size:1.25rem;}
+    }
+
+    /* ════ Reduced motion ════ */
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{
+        animation-duration:.01ms !important;
+        animation-iteration-count:1 !important;
+        transition-duration:.01ms !important;
+      }
+      html{scroll-behavior:auto;}
+    }
+  </style>
+</head>
+<body>
+
+<div id="progress"></div>
+
+<!-- ══════════════════ MOBILE MENU ══════════════════ -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="menu-close" id="menuClose" aria-label="Close menu"><i class="bi bi-x-lg"></i></button>
+  <a href="#hero">Home</a>
+  <a href="#about">About</a>
+  <a href="#services">Services</a>
+  <a href="#projects">Projects</a>
+  <a href="#why">Why Us</a>
+  <a href="#process">Process</a>
+  <a href="#contact">Contact</a>
+  <a href="#partnership" class="btn-solid">Partner With Us <i class="bi bi-arrow-right"></i></a>
+</div>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav id="navbar">
+  <div class="container nav-inner">
+    <a class="nav-logo" href="#hero" aria-label="Flex home">
+      <img src="flex.png" alt="Flex" onerror="this.style.display='none'"/>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#services">Services</a></li>
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#why">Why Us</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <a href="#partnership" class="nav-cta">Partner With Us <i class="bi bi-arrow-right"></i></a>
+    <button class="hamburger" id="hamburger" aria-label="Open menu"><i class="bi bi-list"></i></button>
+  </div>
+</nav>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section id="hero">
+  <div class="hero-dots"></div>
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="hero-badge"><span class="hero-dot"></span> IT Company · Nasugbu, Batangas PH</div>
+        <h1 class="hero-h1">
+          Build Smarter.<br/>
+          <em class="accent">Grow Faster.</em><br/>
+          With Flex.
+        </h1>
+        <p class="hero-sub">
+          We design and build custom websites and digital solutions that help businesses of all sizes thrive in the modern world. Your vision — our technology.
+        </p>
+        <div class="d-flex gap-3 flex-wrap">
+          <a href="#services" class="btn-solid">Explore Services <i class="bi bi-arrow-right"></i></a>
+          <a href="#partnership" class="btn-line"><i class="bi bi-handshake"></i> Partner With Us</a>
+        </div>
+        <div class="hero-stats">
+          <div class="hstat"><b>IT</b><span>Company</span></div>
+          <div class="hstat"><b>PH</b><span>Based in Nasugbu, Batangas</span></div>
+          <div class="hstat"><b>∞</b><span>Ready to Scale</span></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="hero-visual">
+          <div class="mockup">
+            <div class="mbar">
+              <div class="m-d m-r"></div><div class="m-d m-y"></div><div class="m-d m-g"></div>
+              <div class="m-url">flexsoftware.vercel.app</div>
+            </div>
+            <img class="mshot" src="official.png" alt="Flex team at work"/>
+            <div class="mrow">
+              <div class="mcell"><i class="bi bi-lightning-charge"></i><span>Fast</span></div>
+              <div class="mcell"><i class="bi bi-shield-check"></i><span>Secure</span></div>
+              <div class="mcell"><i class="bi bi-phone"></i><span>Responsive</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ MARQUEE ══════════════════ -->
+<div class="marquee-wrap">
+  <div class="marquee-label">Technologies & Platforms We Work With</div>
+  <div class="mq-clip">
+    <div class="mq-track">
+      <div class="mq-item"><i class="bi bi-code-slash"></i> React.js</div>
+      <div class="mq-item"><i class="bi bi-server"></i> Node.js</div>
+      <div class="mq-item"><i class="bi bi-wordpress"></i> WordPress</div>
+      <div class="mq-item"><i class="bi bi-database"></i> MySQL</div>
+      <div class="mq-item"><i class="bi bi-cloud"></i> Firebase</div>
+      <div class="mq-item"><i class="bi bi-shield-check"></i> Laravel</div>
+      <div class="mq-item"><i class="bi bi-globe"></i> Next.js</div>
+      <div class="mq-item"><i class="bi bi-lightning"></i> Tailwind CSS</div>
+      <div class="mq-item"><i class="bi bi-phone"></i> React Native</div>
+      <div class="mq-item"><i class="bi bi-filetype-php"></i> PHP</div>
+      <div class="mq-item"><i class="bi bi-code-slash"></i> React.js</div>
+      <div class="mq-item"><i class="bi bi-server"></i> Node.js</div>
+      <div class="mq-item"><i class="bi bi-wordpress"></i> WordPress</div>
+      <div class="mq-item"><i class="bi bi-database"></i> MySQL</div>
+      <div class="mq-item"><i class="bi bi-cloud"></i> Firebase</div>
+      <div class="mq-item"><i class="bi bi-shield-check"></i> Laravel</div>
+      <div class="mq-item"><i class="bi bi-globe"></i> Next.js</div>
+      <div class="mq-item"><i class="bi bi-lightning"></i> Tailwind CSS</div>
+      <div class="mq-item"><i class="bi bi-phone"></i> React Native</div>
+      <div class="mq-item"><i class="bi bi-filetype-php"></i> PHP</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ ABOUT ══════════════════ -->
+<section id="about">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-5 reveal">
+        <div class="eyebrow">Who We Are</div>
+        <h2 class="s-title">A startup built to make tech <em class="accent">accessible.</em></h2>
+        <p class="s-desc">Flex is an IT Company based in Nasugbu Batangas, Philippines. We're a team passionate about helping businesses — from emerging startups to growing enterprises — build a strong, effective digital presence.</p>
+        <p class="s-desc mt-3">Our goal is simple: make great technology accessible to every business. We combine technical expertise with creative thinking to deliver solutions that drive real, measurable growth.</p>
+        <a href="#contact" class="btn-solid mt-4">Start a Conversation <i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="col-lg-7">
+        <div class="row g-3">
+          <div class="col-6 reveal d1">
+            <div class="card-min about-card">
+              <div class="ico-chip"><i class="bi bi-rocket-takeoff"></i></div>
+              <h5>Startup Mindset</h5>
+              <p>We move fast, learn faster. Our lean approach means you get high-quality results without unnecessary overhead.</p>
+            </div>
+          </div>
+          <div class="col-6 reveal d2">
+            <div class="card-min about-card">
+              <div class="ico-chip"><i class="bi bi-bullseye"></i></div>
+              <h5>Results-Driven</h5>
+              <p>Every decision is aligned with your goals. We measure success by your growth, not just delivery milestones.</p>
+            </div>
+          </div>
+          <div class="col-6 reveal d3">
+            <div class="card-min about-card">
+              <div class="ico-chip"><i class="bi bi-people"></i></div>
+              <h5>Partnership First</h5>
+              <p>We treat every client as a long-term partner. Your journey doesn't end at launch — it's just the beginning.</p>
+            </div>
+          </div>
+          <div class="col-6 reveal d4">
+            <div class="card-min about-card">
+              <div class="ico-chip"><i class="bi bi-lightning-charge"></i></div>
+              <h5>Fast & Transparent</h5>
+              <p>Clear communication, realistic timelines, and no hidden surprises. You're always in the loop.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ SERVICES ══════════════════ -->
+<section id="services">
+  <div class="container">
+    <div class="row mb-5">
+      <div class="col-lg-6 reveal">
+        <div class="eyebrow">What We Offer</div>
+        <h2 class="s-title">Services built for <em class="accent">modern business.</em></h2>
+      </div>
+      <div class="col-lg-6 d-flex align-items-end reveal d2">
+        <p class="s-desc">From design to deployment and beyond — we cover everything your business needs to thrive digitally.</p>
+      </div>
+    </div>
+    <div class="tabs reveal">
+      <button class="tab-btn active" data-tab="web"><i class="bi bi-code-slash"></i> Web Development</button>
+      <button class="tab-btn" data-tab="design"><i class="bi bi-palette"></i> UI/UX Design</button>
+      <button class="tab-btn" data-tab="biz"><i class="bi bi-briefcase"></i> Business Solutions</button>
+      <button class="tab-btn" data-tab="support"><i class="bi bi-tools"></i> IT Support</button>
+    </div>
+    <div class="tab-panel active" id="tab-web">
+      <div class="tab-visual"><img src="backend-coding.png" alt="Web Development" loading="lazy"/></div>
+      <div class="tab-info">
+        <h3>Custom Website Development</h3>
+        <p>We build fully custom, scalable web applications tailored to your specific business goals — no templates, no shortcuts. Clean code, fast performance, and future-ready architecture from day one.</p>
+        <ul class="feat-list">
+          <li>Full-stack custom web applications</li>
+          <li>E-commerce & online store development</li>
+          <li>API integrations and third-party services</li>
+          <li>Mobile-responsive and SEO-optimized builds</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-design">
+      <div class="tab-visual"><img src="design.png" alt="UI/UX Design" loading="lazy"/></div>
+      <div class="tab-info">
+        <h3>Web Design & UI/UX</h3>
+        <p>Stunning, conversion-focused designs that make your brand unforgettable. We craft interfaces that are not just beautiful but deeply intuitive — guiding your users toward action.</p>
+        <ul class="feat-list">
+          <li>Brand-aligned visual identity design</li>
+          <li>User research & wireframing</li>
+          <li>Interactive Figma prototypes</li>
+          <li>Conversion rate optimization</li>
+          <li>Accessibility-first design principles</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-biz">
+      <div class="tab-visual"><img src="cooperation.png" alt="Business solutions" loading="lazy"/></div>
+      <div class="tab-info">
+        <h3>Business Digital Solutions</h3>
+        <p>End-to-end digital transformation that modernizes how your business operates — from customer-facing platforms to internal workflows, dashboards, and automation tools.</p>
+        <ul class="feat-list">
+          <li>Business process digitization</li>
+          <li>Custom dashboards & data analytics</li>
+          <li>Booking, CRM & management systems</li>
+          <li>Payment gateway integration</li>
+          <li>Digital marketing tech stack setup</li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-support">
+      <div class="tab-visual"><img src="online-service.png" alt="IT support" loading="lazy"/></div>
+      <div class="tab-info">
+        <h3>IT Support & Maintenance</h3>
+        <p>We keep your digital products running at peak performance. From security patches to feature updates — your business is always covered, always online.</p>
+        <ul class="feat-list">
+          <li>Proactive security monitoring & updates</li>
+          <li>Performance audits & optimization</li>
+          <li>Bug fixing & technical troubleshooting</li>
+          <li>Hosting, domain & SSL management</li>
+          <li>Ongoing feature development</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ PROJECTS ══════════════════ -->
+<section id="projects">
+  <div class="container">
+    <div class="row align-items-end mb-5">
+      <div class="col-lg-6 reveal">
+        <div class="eyebrow">Our Work</div>
+        <h2 class="s-title">Real projects, <em class="accent">real impact.</em></h2>
+        <p class="s-desc">From trail guides to business platforms — here's what we've built. Every project is crafted with purpose, designed to perform, and built to last.</p>
+      </div>
+    </div>
+
+    <div class="projects-grid" id="projectsGrid">
+
+      <!-- Mt. Masapinit -->
+      <div class="proj-card reveal d1">
+        <div class="proj-thumb">
+          <div class="proj-chrome">
+            <div class="pc-dot pc-r"></div>
+            <div class="pc-dot pc-y"></div>
+            <div class="pc-dot pc-g"></div>
+            <div class="pc-url">mtmasapinit.vercel.app</div>
+            <i class="bi bi-shield-lock pc-lock"></i>
+          </div>
+          <img
+            src="mt-masapinit-preview.png"
+            alt="Mt. Masapinit Trail Guide website"
+            loading="lazy"
+            onerror="this.parentElement.style.background='linear-gradient(135deg,#eef1f6,#e2e6ee)';this.style.display='none';"
+          />
+          <div class="proj-overlay">
+            <a href="https://mtmasapinit.vercel.app" target="_blank" rel="noopener" class="proj-visit-btn">
+              Visit Live Site <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="proj-tags">
+            <span class="proj-tag tag-live">Live</span>
+            <span class="proj-tag">Tourism</span>
+            <span class="proj-tag">Community</span>
+          </div>
+          <h4 class="proj-title">Mt. Masapinit Trail Guide</h4>
+          <p class="proj-desc">A complete digital trail guide for Mt. Masapinit in Toong, Tuy, Batangas — featuring an interactive map, photo gallery, safety tips, hiker community joining, and summit stats. Built for hikers who want peaceful trails and clean nature.</p>
+          <div class="proj-meta">
+            <div class="proj-meta-left">
+              <span>2026</span>
+              <span class="proj-sep"></span>
+              <span>Tourism · Community</span>
+            </div>
+            <a href="https://mtmasapinit.vercel.app" target="_blank" rel="noopener" class="proj-link">
+              View Project <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cassey Fuel Station -->
+      <div class="proj-card reveal d2">
+        <div class="proj-thumb">
+          <div class="proj-chrome">
+            <div class="pc-dot pc-r"></div>
+            <div class="pc-dot pc-y"></div>
+            <div class="pc-dot pc-g"></div>
+            <div class="pc-url">casseyfuelstation.onrender.com</div>
+            <i class="bi bi-shield-lock pc-lock"></i>
+          </div>
+          <img
+            src="cassey.png"
+            alt="Cassey Fuel Station website"
+            loading="lazy"
+            onerror="this.parentElement.style.background='linear-gradient(135deg,#eef1f6,#e2e6ee)';this.style.display='none';"
+          />
+          <div class="proj-overlay">
+            <a href="https://casseyfuelstation.onrender.com" target="_blank" rel="noopener" class="proj-visit-btn">
+              Visit Live Site <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </div>
+        </div>
+        <div class="proj-body">
+          <div class="proj-tags">
+            <span class="proj-tag tag-live">Live</span>
+            <span class="proj-tag">Web App</span>
+          </div>
+          <h4 class="proj-title">Cassey Fuel Station</h4>
+          <p class="proj-desc">A web platform for Cassey Fuel Station — streamlining operations and providing customers with an accessible online presence for fuel services and station information.</p>
+          <div class="proj-meta">
+            <div class="proj-meta-left">
+              <span>2026</span>
+              <span class="proj-sep"></span>
+              <span>Business · Web</span>
+            </div>
+            <a href="https://casseyfuelstation.onrender.com" target="_blank" rel="noopener" class="proj-link">
+              View Project <i class="bi bi-arrow-up-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="text-center mt-5 reveal d3">
+      <p class="s-desc mx-auto mb-4 text-center">Have a project idea? We'd love to help bring it to life.</p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="#contact" class="btn-solid">Start Your Project <i class="bi bi-arrow-right"></i></a>
+        <a href="#services" class="btn-line">View Our Services</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════ WHY US ══════════════════ -->
+<section id="why">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="eyebrow justify-content-center reveal">Our Edge</div>
+      <h2 class="s-title reveal">Why businesses choose <em class="accent">Flex.</em></h2>
+    </div>
+    <div class="why-grid">
+      <div class="card-min why-card reveal d1">
+        <div class="wc-num">01</div>
+        <h4>100% Custom-Built</h4>
+        <p>Every solution is crafted from scratch to match your brand and goals. No cookie-cutter templates — ever.</p>
+      </div>
+      <div class="card-min why-card reveal d2">
+        <div class="wc-num">02</div>
+        <h4>Startup-Friendly Pricing</h4>
+        <p>Fair, honest pricing with full transparency. We scale our services to fit budgets of every size — from MVPs to enterprise builds.</p>
+      </div>
+      <div class="card-min why-card reveal d3">
+        <div class="wc-num">03</div>
+        <h4>You Stay in Control</h4>
+        <p>Regular updates, live previews, and open communication throughout every stage. You're a partner, not just a client.</p>
+      </div>
+      <div class="card-min why-card reveal d1">
+        <div class="wc-num">04</div>
+        <h4>Speed Without Compromise</h4>
+        <p>We deliver on time without cutting corners. Lean processes and an experienced team mean faster results, better quality.</p>
+      </div>
+      <div class="card-min why-card reveal d2">
+        <div class="wc-num">05</div>
+        <h4>Post-Launch Support</h4>
+        <p>Our relationship doesn't end at launch. We provide ongoing maintenance, updates, and growth support as your needs evolve.</p>
+      </div>
+      <div class="why-cta reveal d3">
+        <div>
+          <h4>We're not just a vendor —</h4>
+          <p>we're your long-term digital growth partner.</p>
+        </div>
+        <a href="#partnership" class="btn-white">Start a Partnership <i class="bi bi-arrow-right"></i></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ PROCESS ══════════════════ -->
+<section id="process">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="eyebrow justify-content-center reveal">How We Work</div>
+      <h2 class="s-title reveal">From idea to <em class="accent">live website.</em></h2>
+      <p class="s-desc mx-auto reveal d2">A clear, collaborative process that keeps you informed and in control at every step.</p>
+    </div>
+    <div class="proc-steps">
+      <div class="proc-step reveal d1">
+        <div class="proc-num">01</div>
+        <h5>Discovery & Strategy</h5>
+        <p>We learn your business goals, target audience, and project requirements through an in-depth consultation.</p>
+      </div>
+      <div class="proc-step reveal d2">
+        <div class="proc-num">02</div>
+        <h5>Design & Prototype</h5>
+        <p>Our designers create wireframes and interactive Figma prototypes for your review and approval before any code is written.</p>
+      </div>
+      <div class="proc-step reveal d3">
+        <div class="proc-num">03</div>
+        <h5>Build & Test</h5>
+        <p>We develop your product with clean, maintainable code — followed by rigorous QA testing across all devices and browsers.</p>
+      </div>
+      <div class="proc-step reveal d4">
+        <div class="proc-num">04</div>
+        <h5>Launch & Support</h5>
+        <p>We deploy your product, monitor performance post-launch, and remain available as your business grows and scales.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ PARTNERSHIP ══════════════════ -->
+<section id="partnership">
+  <div class="container text-center">
+    <div class="eyebrow justify-content-center reveal">Collaborate With Us</div>
+    <h2 class="s-title title-center reveal">Let's build your digital future <em class="accent">together.</em></h2>
+    <p class="s-desc mx-auto reveal d2">Whether you're a startup with a bold idea, an entrepreneur ready to go digital, or a company looking to innovate — Flex is ready to be your technology partner.</p>
+    <div class="d-flex gap-2 flex-wrap justify-content-center my-4 reveal d2">
+      <span class="part-badge"><i class="bi bi-rocket-takeoff"></i> Startups</span>
+      <span class="part-badge"><i class="bi bi-lightbulb"></i> Website Design</span>
+      <span class="part-badge"><i class="bi bi-window-stack"></i> Applications</span>
+      <span class="part-badge"><i class="bi bi-cart3"></i> E-commerce</span>
+    </div>
+    <div class="d-flex gap-3 justify-content-center flex-wrap reveal d3">
+      <a href="#contact" class="btn-white">Get In Touch <i class="bi bi-arrow-right"></i></a>
+      <a href="#services" class="btn-oline">Our Services</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ CONTACT ══════════════════ -->
+<section id="contact">
+  <div class="container">
+    <div class="text-center mb-5">
+      <div class="eyebrow justify-content-center reveal">Get In Touch</div>
+      <h2 class="s-title reveal">Let's make something <em class="accent">great.</em></h2>
+      <p class="s-desc mx-auto reveal d2">Have a project in mind? Tell us about it. We respond within 24 hours.</p>
+    </div>
+    <div class="contact-card reveal">
+      <div class="row g-0">
+        <div class="col-lg-5">
+          <div class="contact-left h-100">
+            <h3>Contact Information</h3>
+            <p>Fill out the form and our team will be in touch shortly. We'd love to hear about your project!</p>
+            <div class="ci">
+              <div class="ico-chip-dark"><i class="bi bi-envelope"></i></div>
+              <div><div class="ci-lbl">Email</div><div class="ci-val"><a href="mailto:wlesoftware26@gmail.com">wlesoftware26@gmail.com</a></div></div>
+            </div>
+            <div class="ci">
+              <div class="ico-chip-dark"><i class="bi bi-telephone"></i></div>
+              <div><div class="ci-lbl">Phone</div><div class="ci-val">+639050868984</div></div>
+            </div>
+            <div class="ci">
+              <div class="ico-chip-dark"><i class="bi bi-geo-alt"></i></div>
+              <div><div class="ci-lbl">Location</div><div class="ci-val">Nasugbu Batangas, Philippines</div></div>
+            </div>
+            <div class="ci">
+              <div class="ico-chip-dark"><i class="bi bi-clock"></i></div>
+              <div><div class="ci-lbl">Office Hours</div><div class="ci-val">Mon–Fri PHT</div></div>
+            </div>
+            <div class="c-social">
+              <a href="https://www.facebook.com/profile.php?id=61588478817610" class="csoc csoc-dark" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="csoc csoc-dark" aria-label="X (Twitter)"><i class="bi bi-twitter-x"></i></a>
+              <a href="#" class="csoc csoc-dark" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+              <a href="#" class="csoc csoc-dark" aria-label="GitHub"><i class="bi bi-github"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="contact-right">
+            <form id="contactForm" action="https://api.web3forms.com/submit" method="POST">
+              <input type="hidden" name="access_key" value="03d793d5-75b1-40ed-bb04-76f0d12579cc"/>
+              <div class="honeypot-field">
+                <label for="honeypot">Do not fill this field</label>
+                <input type="text" name="honeypot" id="honeypot" autocomplete="off" tabindex="-1"/>
+              </div>
+              <input type="hidden" name="recaptcha" value="false"/>
+              <input type="hidden" name="subject" value="New message from Flex website"/>
+              <input type="hidden" name="from_name" value="Flex Contact Form"/>
+              <div class="frow">
+                <div class="fg"><label for="cf-name">Full Name *</label><input id="cf-name" type="text" name="name" placeholder="Juan dela Cruz" required/></div>
+                <div class="fg"><label for="cf-email">Email Address *</label><input id="cf-email" type="email" name="email" placeholder="you@company.com" required/></div>
+              </div>
+              <div class="frow">
+                <div class="fg"><label for="cf-company">Company</label><input id="cf-company" type="text" name="company" placeholder="Your Company"/></div>
+                <div class="fg"><label for="cf-phone">Phone Number</label><input id="cf-phone" type="tel" name="phone" placeholder="+63 9XX XXX XXXX"/></div>
+              </div>
+              <div class="frow">
+                <div class="fg">
+                  <label for="cf-service">Service Needed</label>
+                  <select id="cf-service" name="service">
+                    <option value="">Select a service…</option>
+                    <option>Custom Website Development</option>
+                    <option>Web Design & UI/UX</option>
+                    <option>Business Digital Solutions</option>
+                    <option>IT Support & Maintenance</option>
+                    <option>Partnership / Collaboration</option>
+                  </select>
+                </div>
+                <div class="fg">
+                  <label for="cf-budget">Budget Range</label>
+                  <select id="cf-budget" name="budget">
+                    <option value="">Select a range…</option>
+                    <option>Below ₱5,000</option>
+                    <option>₱5,000 – ₱10,000</option>
+                    <option>₱10,000 – ₱15,000</option>
+                    <option>₱15,000 – ₱20,000</option>
+                    <option>Above ₱20,000</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fg">
+                <label for="cf-message">Tell us about your project *</label>
+                <textarea id="cf-message" rows="4" name="message" placeholder="Describe your project, goals, and any specific requirements…" required></textarea>
+              </div>
+              <button type="submit" class="btn-solid btn-submit" id="submitBtn">Send Message <i class="bi bi-send"></i></button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ MAP ══════════════════ -->
+<section id="map-section">
+  <div class="container">
+    <div class="row align-items-center mb-4">
+      <div class="col-lg-6 reveal">
+        <div class="eyebrow">Find Us</div>
+        <h2 class="s-title mb-0">We're based in <em class="accent">Nasugbu Batangas.</em></h2>
+      </div>
+      <div class="col-lg-6 reveal d2">
+        <p class="s-desc">Come visit us or reach out online — we're always happy to connect with businesses and entrepreneurs looking to grow digitally.</p>
+      </div>
+    </div>
+    <div class="map-container reveal">
+      <div id="map"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="foot-logo">Flex</div>
+        <div class="foot-tag">Innovate • Connect • Grow</div>
+        <p class="foot-desc">Building the digital future, one business at a time. From startups to enterprises — we make great tech accessible.</p>
+        <div class="d-flex gap-2">
+          <a href="#" class="csoc csoc-light" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="csoc csoc-light" aria-label="X (Twitter)"><i class="bi bi-twitter-x"></i></a>
+          <a href="#" class="csoc csoc-light" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="csoc csoc-light" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Company</div>
+        <a href="#about" class="foot-a">About Us</a>
+        <a href="#services" class="foot-a">Services</a>
+        <a href="#projects" class="foot-a">Our Projects</a>
+        <a href="#process" class="foot-a">Our Process</a>
+        <a href="#contact" class="foot-a">Contact</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Services</div>
+        <a href="#services" class="foot-a">Web Development</a>
+        <a href="#services" class="foot-a">UI/UX Design</a>
+        <a href="#services" class="foot-a">Business Solutions</a>
+        <a href="#services" class="foot-a">IT Support</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Projects</div>
+        <a href="https://mtmasapinit.vercel.app" target="_blank" rel="noopener" class="foot-a">Mt. Masapinit <i class="bi bi-arrow-up-right"></i></a>
+        <a href="#projects" class="foot-a">View All Work</a>
+        <a href="#contact" class="foot-a">Start a Project</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <div class="foot-h">Legal</div>
+        <a href="#" class="foot-a">Privacy Policy</a>
+        <a href="#" class="foot-a">Terms of Service</a>
+        <a href="#" class="foot-a">Cookie Policy</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <p>© 2026 Flex Software. All rights reserved.</p>
+      <p>Made with <i class="bi bi-heart-fill heart"></i> in Nasugbu Batangas, Philippines</p>
+    </div>
+  </div>
+</footer>
+
+<!-- ════ Toast + back-to-top ════ -->
+<div id="toast" role="status">
+  <i class="bi bi-check-circle-fill t-ico"></i>
+  <div>
+    <div class="t-msg">Message sent!</div>
+    <div class="t-sub">We'll reply within 24 hours.</div>
+  </div>
+</div>
+<button id="toTop" aria-label="Back to top"><i class="bi bi-arrow-up"></i></button>
+
+<!-- ══════════════════ SCRIPTS ══════════════════ -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+/* ── Navbar state · active links · progress · back-to-top ── */
+const navbar = document.getElementById('navbar');
+const progress = document.getElementById('progress');
+const toTop = document.getElementById('toTop');
+
+function onScroll(){
+  const y = window.scrollY;
+  navbar.classList.toggle('scrolled', y > 40);
+  const max = document.documentElement.scrollHeight - window.innerHeight;
+  progress.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+  toTop.classList.toggle('show', y > 600);
+  document.querySelectorAll('section[id]').forEach(sec => {
+    const active = y >= sec.offsetTop - 120 && y < sec.offsetTop + sec.offsetHeight - 120;
+    const link = document.querySelector(`.nav-links a[href="#${sec.id}"]`);
+    if(link) link.classList.toggle('active', active);
+    const mLink = document.querySelector(`.mobile-menu a[href="#${sec.id}"]`);
+    if(mLink) mLink.classList.toggle('active', active);
+  });
+}
+window.addEventListener('scroll', onScroll, { passive:true });
+toTop.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+/* ── Mobile menu ── */
+const mMenu = document.getElementById('mobileMenu');
+const hamburger = document.getElementById('hamburger');
+const menuClose = document.getElementById('menuClose');
+function openMob(){ mMenu.classList.add('open'); document.body.style.overflow = 'hidden'; }
+function closeMob(){ mMenu.classList.remove('open'); document.body.style.overflow = ''; }
+hamburger.addEventListener('click', openMob);
+menuClose.addEventListener('click', closeMob);
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeMob(); });
+
+/* ── Scroll reveal ── */
+const io = new IntersectionObserver(
+  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('up'); }),
+  { threshold: 0.1 }
+);
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── Services tabs ── */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ── Contact form ── */
+document.getElementById('contactForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const form = e.target;
+  const submitBtn = document.getElementById('submitBtn');
+  const originalText = submitBtn.innerHTML;
+  submitBtn.innerHTML = 'Sending… <i class="bi bi-hourglass-split"></i>';
+  submitBtn.disabled = true;
+  try {
+    const formData = new FormData(form);
+    const response = await fetch(form.action, { method: form.method, body: formData, headers: { 'Accept': 'application/json' } });
+    const result = await response.json();
+    if(result.success){
+      const t = document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 4500);
+      form.reset();
+    } else {
+      alert('Oops! Something went wrong. Please try again or email us directly.');
+    }
+  } catch(error){
+    alert('Network error. Please check your connection.');
+  } finally {
+    submitBtn.innerHTML = originalText;
+    submitBtn.disabled = false;
+  }
+});
+
+/* ── Smooth scroll ── */
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const id = a.getAttribute('href');
+    if(id.length > 1){
+      const el = document.querySelector(id);
+      if(el){ e.preventDefault(); el.scrollIntoView({ behavior:'smooth' }); closeMob(); }
+    }
+  });
+});
+
+/* ── Leaflet map ── */
+const BATANGAS = [14.0722, 120.6316];
+const map = L.map('map', { center: BATANGAS, zoom: 15, zoomControl: false, scrollWheelZoom: false, attributionControl: true });
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+  subdomains: 'abcd', maxZoom: 20,
+}).addTo(map);
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+const markerIcon = L.divIcon({
+  html: `<div style="width:40px;height:40px;background:#1648f5;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid #fff;box-shadow:0 4px 14px rgba(22,72,245,.35);display:flex;align-items:center;justify-content:center;"><div style="width:12px;height:12px;background:#fff;border-radius:50%;transform:rotate(45deg);"></div></div>`,
+  className: '', iconSize: [40,40], iconAnchor: [20,40], popupAnchor: [0,-44],
+});
+const popupContent = `<div class="map-popup"><div class="map-popup-logo">Flex</div><div class="map-popup-tag">IT Company</div><div class="map-popup-addr"><i class="bi bi-geo-alt-fill"></i><span>Nasugbu, Batangas<br/>Philippines 4231</span></div><div class="map-badge"><span class="map-badge-dot"></span>Open · Mon–Fri PHT</div></div>`;
+L.marker(BATANGAS, { icon: markerIcon }).addTo(map)
+  .bindPopup(popupContent, { maxWidth: 240, closeButton: true, className: 'flex-popup' })
+  .openPopup();
+L.circle(BATANGAS, { color: '#1648f5', fillColor: '#1648f5', fillOpacity: 0.05, weight: 1.5, dashArray: '6 4', radius: 300 }).addTo(map);
+const mapObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){
+      setTimeout(() => { map.flyTo(BATANGAS, 15, { duration: 1.5, easeLinearity: 0.25 }); }, 300);
+      mapObserver.disconnect();
+    }
+  });
+}, { threshold: 0.3 });
+mapObserver.observe(document.getElementById('map'));
+
+window.addEventListener('load', onScroll);
+</script>
+</body>
+</html>
